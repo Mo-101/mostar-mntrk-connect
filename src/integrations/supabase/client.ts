@@ -7,7 +7,10 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://fdezrtfnjswey
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZXpydGZuanN3ZXlvYm9yaHdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMwOTkwMzAsImV4cCI6MjA0ODY3NTAzMH0.Eaqr65G0feAYC0y4aWD_9HoGDRdrTCuXYuNgLoAQ9-c";
 
 // Toggle this to switch between mock and real data
-export const USE_MOCK_DATA = false;
+export const USE_MOCK_DATA = true;
+
+// Weather API configuration
+export const OPENWEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY || ''; // Will use mock data if empty
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";

@@ -1,20 +1,17 @@
 
 import { CesiumMapWithData } from "@/components/CesiumMapWithData";
-import { WeatherMetrics } from "@/components/WeatherMetrics";
+import { WeatherInfo } from "@/components/WeatherInfo";
 import { ConversationBox } from "@/components/ConversationBox";
 import { RiskAssessmentPanel } from "@/components/training/RiskAssessmentPanel";
-import { useEffect, useMemo } from "react";
+import { InfoContainer } from "@/components/InfoContainer";
+import { useEffect, useMemo, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { initializeRealtimeServices } from "@/services/apiService";
 import "../styles/mapAnimations.css";
 
 const Index = () => {
-  const weatherMetrics = [
-    { type: "rain", value: 25, unit: "mm" },
-    { type: "wind", value: 15, unit: "km/h" },
-    { type: "clear", value: 28, unit: "°C" }
-  ];
-
+  const [cesiumViewer, setCesiumViewer] = useState<any>(null);
+  
   // Add mock news items
   const newsItems = [
     "High risk detected in Maiduguri region - Population density increasing",
@@ -42,18 +39,26 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [memoizedNewsItems]);
   
+  // Handler to capture Cesium viewer instance from child component
+  const handleViewerCreated = (viewer: any) => {
+    setCesiumViewer(viewer);
+  };
+  
   return (
     <div className="w-full h-screen overflow-hidden">
-      <CesiumMapWithData />
+      {/* CesiumMap with callback to get viewer reference */}
+      <CesiumMapWithData onViewerCreated={handleViewerCreated} />
       
+      {/* Risk Assessment Panel */}
       <div className="absolute top-4 left-4 w-72">
         <RiskAssessmentPanel />
       </div>
       
-      {/* Weather metrics */}
-      <div className="w-full top-5 h-screen overflow-hidden">
-          <WeatherMetrics metrics={weatherMetrics} />
-      </div>    
+      {/* Weather Information */}
+      <WeatherInfo />
+      
+      {/* Alert Container */}
+      <InfoContainer />
       
       {/* News ticker at bottom */}
       <div className="fixed bottom-15 left-0 right-0 bg-black/40 backdrop-blur-sm border-t border-gray-800 z-50">
