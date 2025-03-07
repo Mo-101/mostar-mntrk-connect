@@ -6,6 +6,9 @@ import type { Database } from './types';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://fdezrtfnjsweyoborhwg.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZXpydGZuanN3ZXlvYm9yaHdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMwOTkwMzAsImV4cCI6MjA0ODY3NTAzMH0.Eaqr65G0feAYC0y4aWD_9HoGDRdrTCuXYuNgLoAQ9-c";
 
+// Toggle this to switch between mock and real data
+export const USE_MOCK_DATA = false;
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
@@ -14,6 +17,14 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
 // Test connection method - can be used to check if Supabase is connected
 export const testSupabaseConnection = async () => {
   try {
+    if (USE_MOCK_DATA) {
+      console.log("Using mock data as configured");
+      return { 
+        connected: false, 
+        error: "Mock mode enabled" 
+      };
+    }
+    
     // Try a simple query that should work with minimal permissions
     const { data, error } = await supabase.from('training_metrics').select('count').limit(1);
     
@@ -25,6 +36,7 @@ export const testSupabaseConnection = async () => {
       };
     }
     
+    console.log("Successfully connected to Supabase");
     return { 
       connected: true, 
       data 
