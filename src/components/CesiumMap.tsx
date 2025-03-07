@@ -5,7 +5,6 @@ import {
   Ion, Cartesian3, Color, BoundingSphere,
   createWorldTerrainAsync, ShadowMap
 } from "@cesium/engine";
-import { WindParticleSystem3D } from "./WindParticleSystem3D";
 
 // Set up your Cesium ion access token
 Ion.defaultAccessToken = import.meta.env.VITE_CESIUM_ION_TOKEN || 
@@ -70,7 +69,7 @@ export const CesiumMap = () => {
         infoBox={false}
         selectionIndicator={false}
       >
-        {viewerRef.current && viewerRef.current.cesiumElement && (
+        {viewerRef.current?.cesiumElement && (
           <WindParticleSystem3D viewer={viewerRef.current.cesiumElement} />
         )}
       </Viewer>

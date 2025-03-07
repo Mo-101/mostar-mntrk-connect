@@ -92,7 +92,7 @@ export const CesiumMap = () => {
         shadows={true}
         className="cesium-viewer-dark"
       >
-        {viewerRef.current && viewerRef.current.cesiumElement && (
+        {viewerRef.current?.cesiumElement && (
           <WindParticleSystem3D viewer={viewerRef.current.cesiumElement} />
         )}
       </Viewer>

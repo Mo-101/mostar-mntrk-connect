@@ -274,8 +274,8 @@ const api = {
           epoch: data.epoch,
           accuracy: data.accuracy,
           loss: data.loss,
-          val_accuracy: data.val_accuracy || data.accuracy,
-          val_loss: data.val_loss || data.loss,
+          val_accuracy: data.accuracy,
+          val_loss: data.loss,
           timestamp: data.created_at
         };
       } catch (error) {
