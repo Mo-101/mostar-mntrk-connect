@@ -1,0 +1,15 @@
+connexion >= 2.6.0
+connexion[swagger-ui] >= 2.6.0
+python_dateutil == 2.6.0
+setuptools >= 21.0.0
+swagger-ui-bundle >= 0.0.2
+openai>=1.0.0
+python-dotenv
+flask-cors
+gunicorn
+requests
+pytest  # Added for testing
+flask_testing  # Added for testing
+deepseek-ai==0.0.1 # Install 0.0.1
+transformers>=4.0.0  # Required for DeepSeek models
+torch>=2.0.0  # Required for DeepSeek models

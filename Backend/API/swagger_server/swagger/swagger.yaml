@@ -1,0 +1,300 @@
+openapi: 3.0.0
+info:
+  title: Mastomys Tracking API
+  description: API for tracking and analyzing Mastomys populations
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /locations:
+    get:
+      summary: Get all locations
+      operationId: get_locations
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Location'
+        '500':
+          description: Internal server error
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+  /locations/{location_id}/summary:
+    get:
+      summary: Get location summary
+      operationId: get_location_summary
+      parameters:
+        - name: location_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationSummary'
+        '500':
+          description: Internal server error
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+  /observations:
+    get:
+      summary: Get all observations
+      operationId: get_observations
+      parameters:
+        - name: location_id
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Observation'
+        '500':
+          description: Internal server error
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+    post:
+      summary: Add new observation
+      operationId: add_observation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Observation'
+      responses:
+        '201':
+          description: Successfully created
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal server error
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+  /environmental-data:
+    get:
+      summary: Get environmental data
+      operationId: get_environmental_data
+      parameters:
+        - name: location_id
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: start_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: end_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EnvironmentalData'
+        '500':
+          description: Internal server error
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+    post:
+      summary: Add environmental data
+      operationId: add_environmental_data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnvironmentalData'
+      responses:
+        '201':
+          description: Successfully created
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal server error
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+  /risk-assessments:
+    get:
+      summary: Get risk assessments
+      operationId: get_risk_assessments
+      parameters:
+        - name: location_id
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: risk_level
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [low, medium, high, critical]
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RiskAssessment'
+        '500':
+          description: Internal server error
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+  /risk-assessments/{assessment_id}:
+    put:
+      summary: Update risk assessment
+      operationId: update_risk_assessment
+      parameters:
+        - name: assessment_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiskAssessment'
+      responses:
+        '200':
+          description: Successfully updated
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal server error
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+components:
+  schemas:
+    Location:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        elevation:
+          type: number
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    Observation:
+      type: object
+      properties:
+        id:
+          type: integer
+        location_id:
+          type: integer
+        observer_id:
+          type: string
+          format: uuid
+        observation_date:
+          type: string
+          format: date-time
+        population_count:
+          type: integer
+        habitat_description:
+          type: string
+        weather_conditions:
+          type: object
+        images:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [pending, verified, rejected]
+        notes:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    EnvironmentalData:
+      type: object
+      properties:
+        id:
+          type: integer
+        location_id:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+        temperature:
+          type: number
+        humidity:
+          type: number
+        rainfall:
+          type: number
+        soil_moisture:
+          type: number
+        vegetation_index:
+          type: number
+        created_at:
+          type: string
+          format: date-time
+    RiskAssessment:
+      type: object
+      properties:
+        id:
+          type: integer
+        location_id:
+          type: integer
+        assessment_date:
+          type: string
+          format: date-time
+        risk_level:
+          type: string
+          enum: [low, medium, high, critical]
+        factors:
+          type: object
+        mitigation_measures:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    LocationSummary:
+      type: object
+      properties:
+        latest_observation:
+          $ref: '#/components/schemas/Observation'
+        latest_environmental_data:
+          $ref: '#/components/schemas/EnvironmentalData'
+        latest_risk_assessment:
+          $ref: '#/components/schemas/RiskAssessment'

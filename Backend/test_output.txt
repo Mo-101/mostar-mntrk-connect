@@ -1,0 +1,19 @@
+
+# Backend System Integration Test Output
+- Checking backend components
+- Testing connectivity between services
+- Verifying environment configuration
+
+## System Architecture
+- API Server: Swagger-based FastAPI/Flask API
+- Agent: Processing logic for field data
+- DeepSeek: AI integration for analytics
+- Supabase: Database, Auth, and Storage
+
+## Connection Flow
+API Server → Authentication → Agent → DeepSeek → Supabase
+
+## Configuration
+- Environment variables loaded from .env files
+- Supabase connection established
+- DeepSeek API integration configured

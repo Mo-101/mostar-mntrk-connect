@@ -1,0 +1,17 @@
+# Pytest cache
+.pytest_cache/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Coverage
+.coverage
+coverage.xml
+htmlcov/
+
+# Other Python testing/build artifacts
+*.egg-info/
+dist/
+build/
+.eggs/
