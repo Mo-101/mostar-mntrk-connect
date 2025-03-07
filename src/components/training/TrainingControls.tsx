@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useApi } from '@/hooks/useApi';
 import { TrainingMetric } from '@/types/api';
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, testSupabaseConnection } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { TrainingProgress } from './TrainingProgress';
 import { ConnectionStatus } from './ConnectionStatus';
@@ -16,21 +16,26 @@ export function TrainingControls() {
   const [accuracy, setAccuracy] = useState(0);
   const [loss, setLoss] = useState(0);
   const [isConnected, setIsConnected] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   
   useEffect(() => {
     const checkSupabaseConnection = async () => {
       try {
-        const { data, error } = await supabase.from('training_metrics').select('count').limit(1);
-        if (!error) {
-          setIsConnected(true);
+        const { connected, error } = await testSupabaseConnection();
+        
+        if (connected) {
           console.log("Successfully connected to Supabase");
+          setIsConnected(true);
+          setConnectionError(null);
         } else {
           console.error("Supabase connection error:", error);
           setIsConnected(false);
+          setConnectionError(error as string);
         }
       } catch (err) {
         console.error("Error checking Supabase connection:", err);
         setIsConnected(false);
+        setConnectionError(err instanceof Error ? err.message : "Unknown error");
       }
     };
     
