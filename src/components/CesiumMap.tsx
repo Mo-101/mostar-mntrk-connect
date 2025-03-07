@@ -5,6 +5,7 @@ import {
   Ion, Cartesian3, Color, BoundingSphere,
   createWorldTerrainAsync, ShadowMap
 } from "@cesium/engine";
+import { WindParticleSystem3D } from "./WindParticleSystem3D";
 
 // Set up your Cesium ion access token
 Ion.defaultAccessToken = import.meta.env.VITE_CESIUM_ION_TOKEN || 
@@ -37,14 +38,7 @@ export const CesiumMap = () => {
     const nigeriaCenter = Cartesian3.fromDegrees(8.6753, 9.0820, 1000000);
     const boundingSphere = new BoundingSphere(nigeriaCenter, 1000000);
     
-    viewer.camera.flyToBoundingSphere(boundingSphere, {
-      duration: 2,
-      offset: {
-        heading: 0,
-        pitch: -Math.PI / 4,
-        range: 1000000
-      }
-    });
+    viewer.camera.flyToBoundingSphere(boundingSphere);
 
     // Clean up
     return () => {
