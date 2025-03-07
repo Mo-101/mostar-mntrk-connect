@@ -32,7 +32,21 @@ export function InfoContainer({ className }: InfoContainerProps) {
           }
           
           if (data) {
-            setAlerts(data);
+            // Transform the data to match RiskAssessment type
+            const transformedData: RiskAssessment[] = data.map(item => ({
+              id: item.id,
+              region: item.location_id ? `Region ${item.location_id}` : 'Unknown',
+              risk_level: item.risk_level as 'LOW' | 'MEDIUM' | 'HIGH',
+              assessment_date: item.assessment_date,
+              mitigation_measures: item.mitigation_measures || [],
+              details: {
+                environmental_factors: (typeof item.factors === 'object' && item.factors?.environmental_factors) || [],
+                population_density: (typeof item.factors === 'object' && item.factors?.population_density) || 0,
+                historical_data: (typeof item.factors === 'object' && item.factors?.historical_data) || ''
+              }
+            }));
+            
+            setAlerts(transformedData);
           }
         } else {
           // Mock data

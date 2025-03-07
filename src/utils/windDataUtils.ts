@@ -1,60 +1,74 @@
 
-import { Wind3DData } from "@/types/wind";
+import { WindDataPoint, Wind3DData } from '@/types/wind';
+import { Color } from 'cesium';
 
-// Function to fetch simulated wind data
-export const fetchWindData = async (): Promise<Wind3DData> => {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 500));
+// Convert wind data points to a format usable by the 3D visualization system
+export const processWindData = (dataPoints: WindDataPoint[]): Wind3DData => {
+  return {
+    particles: Math.min(dataPoints.length * 100, 5000),
+    maxParticles: 10000, 
+    particleHeight: 500,
+    fadeOpacity: 0.9,
+    dropRate: 0.003,
+    dropRateBump: 0.01,
+    speedFactor: 0.5,
+    lineWidth: 4,
+    width: 800,
+    height: 600,
+    points: dataPoints
+  };
+};
+
+// Generate random wind data points for testing
+export const generateMockWindData = (count: number = 5): WindDataPoint[] => {
+  const mockPoints: WindDataPoint[] = [];
   
-  // Create mock wind data grid
-  const lon = 36;  // number of longitude points
-  const lat = 18;  // number of latitude points
+  // Center around Nigeria
+  const centerLat = 9.0820;
+  const centerLon = 8.6753;
   
-  // Create arrays for longitude and latitude coordinates
-  const lonArray = Array.from({ length: lon }, (_, i) => 0 + (i * 10));
-  const latArray = Array.from({ length: lat }, (_, i) => -90 + (i * 10));
-  
-  // Generate U and V wind components
-  const uArray = [];
-  const vArray = [];
-  let uMin = Infinity;
-  let uMax = -Infinity;
-  let vMin = Infinity;
-  let vMax = -Infinity;
-  
-  for (let j = 0; j < lat; j++) {
-    for (let i = 0; i < lon; i++) {
-      // Create some patterns in the data
-      const u = Math.sin(j / lat * Math.PI) * 10 + (Math.random() * 5 - 2.5);
-      const v = Math.cos(i / lon * Math.PI) * 10 + (Math.random() * 5 - 2.5);
-      
-      uArray.push(u);
-      vArray.push(v);
-      
-      // Update min/max values
-      uMin = Math.min(uMin, u);
-      uMax = Math.max(uMax, u);
-      vMin = Math.min(vMin, v);
-      vMax = Math.max(vMax, v);
-    }
+  for (let i = 0; i < count; i++) {
+    // Generate points in a grid around the center
+    const latOffset = (Math.random() - 0.5) * 5; // +/- 2.5 degrees
+    const lonOffset = (Math.random() - 0.5) * 5; // +/- 2.5 degrees
+    
+    // Wind properties
+    const speed = 5 + Math.random() * 15; // 5-20 m/s
+    const direction = Math.random() * 360; // 0-360 degrees
+    
+    // Calculate u/v components
+    const uComponent = Math.sin(direction * Math.PI / 180) * speed;
+    const vComponent = Math.cos(direction * Math.PI / 180) * speed;
+    
+    mockPoints.push({
+      id: `wind-${i}`,
+      coordinates: [centerLon + lonOffset, centerLat + latOffset] as [number, number],
+      u: uComponent,
+      v: vComponent,
+      speed: speed,
+      direction: direction,
+      timestamp: new Date().toISOString(),
+      position: {
+        longitude: centerLon + lonOffset,
+        latitude: centerLat + latOffset,
+        altitude: 5000 + Math.random() * 10000 // 5-15km altitude
+      },
+      weather: ['Clear', 'Clouds', 'Rain'][Math.floor(Math.random() * 3)]
+    });
   }
   
-  return {
-    dimensions: {
-      lon,
-      lat
-    },
-    lon: lonArray,
-    lat: latArray,
-    U: {
-      array: uArray,
-      min: uMin,
-      max: uMax
-    },
-    V: {
-      array: vArray,
-      min: vMin,
-      max: vMax
-    }
-  };
+  return mockPoints;
+};
+
+// Get appropriate color based on wind speed
+export const getWindSpeedColor = (speed: number): Color => {
+  if (speed < 5) {
+    return new Color(0.2, 0.5, 0.9, 0.7); // Light blue for light winds
+  } else if (speed < 10) {
+    return new Color(0.1, 0.7, 0.5, 0.7); // Teal for moderate winds
+  } else if (speed < 15) {
+    return new Color(0.9, 0.6, 0.1, 0.8); // Orange for strong winds
+  } else {
+    return new Color(0.9, 0.2, 0.2, 0.9); // Red for very strong winds
+  }
 };

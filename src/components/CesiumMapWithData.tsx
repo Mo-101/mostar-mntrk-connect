@@ -22,9 +22,10 @@ export const CesiumMapWithData = ({ onViewerCreated }: CesiumMapWithDataProps) =
     // Fetch map locations
     const fetchMapLocations = async () => {
       try {
-        const data = await apiCall(() => api.mapData.getLocations());
-        if (data) {
-          setLocations(data);
+        // Modified to match the correct return type
+        const response = await api.mapData.getLocations();
+        if (response && Array.isArray(response)) {
+          setLocations(response);
         }
       } catch (error) {
         console.error("Error fetching map locations:", error);

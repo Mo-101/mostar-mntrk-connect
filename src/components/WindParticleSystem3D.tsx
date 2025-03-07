@@ -98,9 +98,12 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
       const speedVariation = Math.random() * 1.5 - 0.75; // -0.75 to 0.75
       const degVariation = Math.random() * 30 - 15; // -15 to 15 degrees
       
+      // Ensure coords is always a tuple of [number, number] to match WindDataPoint type
+      const fixedCoords: [number, number] = [coords[0], coords[1]];
+      
       return {
         id: `wind-${index}`,
-        coordinates: coords,
+        coordinates: fixedCoords,
         u: Math.sin((weather.wind.deg + degVariation) * Math.PI / 180) * 
            (weather.wind.speed + speedVariation),
         v: Math.cos((weather.wind.deg + degVariation) * Math.PI / 180) * 
@@ -151,18 +154,18 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
         // Create particle system
         createParticleSystem(windData, weather);
         
-        // Publish wind data to Supabase if connected and not in mock mode
+        // Store wind data if needed
         if (!USE_MOCK_DATA) {
-          const { error } = await supabase
-            .from('wind_data')
-            .insert({ 
+          try {
+            // Use local storage or another method to cache wind data
+            // instead of Supabase if the table doesn't exist
+            localStorage.setItem('wind_data', JSON.stringify({ 
               data: windData,
               weather_data: weather,
               timestamp: new Date().toISOString()
-            });
-            
-          if (error) {
-            console.error("Error saving wind data to Supabase:", error);
+            }));
+          } catch (error) {
+            console.error("Error saving wind data:", error);
           }
         }
       } catch (error) {
@@ -242,7 +245,12 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
         emissionRate: particleCount / 5,
         lifetime: 16.0,
         emitter: new CircleEmitter(600.0),
-        modelMatrix: Cartesian3.toCartesian4(position, 0),
+        modelMatrix: Cartesian3.fromDegrees(
+          point.position.longitude,
+          point.position.latitude,
+          point.position.altitude,
+          undefined
+        ),
         emitterModelMatrix: calculateEmitterMatrix(point.direction)
       });
       
