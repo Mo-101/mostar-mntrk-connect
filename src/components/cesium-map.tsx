@@ -7,7 +7,8 @@ import {
   Ion,
   IonImageryProvider,
   createOsmBuildingsAsync,
-  ShadowMode
+  ShadowMap,
+  Color
 } from "@cesium/engine";
 import { WindParticleSystem3D } from "./WindParticleSystem3D";
 
@@ -45,6 +46,17 @@ export const CesiumMap = () => {
         addBuildings();
       });
 
+    // Configure shadows
+    viewer.shadowMap = new ShadowMap({
+      enabled: true,
+      size: 2048,
+      softShadows: true,
+      darkness: 0.3,
+      fadingEnabled: true,
+      maximumDistance: 10000,
+      normalOffset: false
+    });
+
     // Set initial camera position
     viewer.camera.flyTo({
       destination: Cartesian3.fromDegrees(9.0765, 7.3986, 1500000),
@@ -80,20 +92,9 @@ export const CesiumMap = () => {
         shadows={true}
         className="cesium-viewer-dark"
       >
-        <Scene 
-          shadowMap={{ 
-            enabled: true,
-            size: 2048,
-            softShadows: true
-          }}
-        />
-        <Globe
-          enableLighting={true}
-          showGroundAtmosphere={true}
-          depthTestAgainstTerrain={true}
-        />
-        <Camera />
-        {viewerRef.current && <WindParticleSystem3D viewerRef={viewerRef} />}
+        {viewerRef.current && viewerRef.current.cesiumElement && (
+          <WindParticleSystem3D viewer={viewerRef.current.cesiumElement} />
+        )}
       </Viewer>
     </div>
   );

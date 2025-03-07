@@ -2,9 +2,9 @@
 import { useEffect, useRef } from "react";
 import { Viewer, Scene, Globe, Camera } from "resium";
 import { 
-  Ion, ShadowMap, Cartesian3, Matrix4, 
-  CameraFlyToBoundingSphere, BoundingSphere 
-} from "cesium";
+  Ion, Cartesian3, Color, BoundingSphere,
+  createWorldTerrainAsync, ShadowMap
+} from "@cesium/engine";
 import { WindParticleSystem3D } from "./WindParticleSystem3D";
 
 // Set up your Cesium ion access token
@@ -70,21 +70,6 @@ export const CesiumMap = () => {
         infoBox={false}
         selectionIndicator={false}
       >
-        <Scene 
-          skyBox={false}
-          backgroundColor={{ red: 0, green: 0, blue: 0, alpha: 1 }}
-          globe={{ enableLighting: true }}
-        />
-        <Globe 
-          enableLighting={true}
-          baseColor={{ red: 0.1, green: 0.1, blue: 0.2, alpha: 1 }}
-        />
-        <Camera 
-          position={Cartesian3.fromDegrees(8.6753, 9.0820, 2000000)}
-          direction={new Cartesian3(0, 0, -1)}
-          frustum={{ near: 100, far: 10000000 }}
-        />
-        
         {viewerRef.current && viewerRef.current.cesiumElement && (
           <WindParticleSystem3D viewer={viewerRef.current.cesiumElement} />
         )}

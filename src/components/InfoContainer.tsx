@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { AlertTriangle, ShieldAlert, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -34,25 +33,27 @@ export function InfoContainer({ className }: InfoContainerProps) {
           if (data) {
             // Transform the data to match RiskAssessment type
             const transformedData: RiskAssessment[] = data.map(item => {
-              // Safely access nested properties
+              // Initialize default values
               let environmentalFactors: string[] = [];
               let populationDensity = 0;
               let historicalData = '';
               
               // Check if factors exists and is an object
-              if (item.factors && typeof item.factors === 'object') {
-                // Access properties safely with optional chaining
-                environmentalFactors = Array.isArray(item.factors.environmental_factors) 
-                  ? item.factors.environmental_factors 
-                  : [];
-                  
-                populationDensity = typeof item.factors.population_density === 'number'
-                  ? item.factors.population_density
-                  : 0;
-                  
-                historicalData = typeof item.factors.historical_data === 'string'
-                  ? item.factors.historical_data
-                  : '';
+              if (item.factors && typeof item.factors === 'object' && !Array.isArray(item.factors)) {
+                // Access properties safely using type assertions
+                const factors = item.factors as Record<string, any>;
+                
+                if (Array.isArray(factors.environmental_factors)) {
+                  environmentalFactors = factors.environmental_factors;
+                }
+                
+                if (typeof factors.population_density === 'number') {
+                  populationDensity = factors.population_density;
+                }
+                
+                if (typeof factors.historical_data === 'string') {
+                  historicalData = factors.historical_data;
+                }
               }
               
               return {
