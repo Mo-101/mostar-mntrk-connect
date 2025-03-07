@@ -1,8 +1,34 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* Add a flex container for layout */
+.container {
+  display: flex; /* Align children side by side */
+  gap: 20px; /* Add spacing between left and right containers */
+  align-items: flex-start; /* Align containers to the top */
+  padding: 20px;
+}
+
+/* Style the left container */
+.left-container {
+  flex: 1; /* Adjust width */
+  height: 250px; /* Reduce height */
+  background-color: #f5f5f5; /* Optional background */
+  padding: 15px;
+  border-radius: 8px;
+}
+
+/* Style the right container */
+.right-container {
+  flex: 2; /* Adjust width */
+  display: flex;
+  flex-direction: column; /* Stack cards vertically */
+  gap: 15px; /* Spacing between cards */
+}
+
+/* Style individual cards */
+.card {
+  background-color: #ffffff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional shadow */
 }
 
 .logo {

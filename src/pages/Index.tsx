@@ -1,83 +1,74 @@
 
-import { Cpu, BarChart3, AlertCircle, Truck } from "lucide-react";
-import Navbar from "@/components/dashboard/Navbar";
-import Sidebar from "@/components/dashboard/Sidebar";
-import StatCard from "@/components/dashboard/StatCard";
-import ActivityLog from "@/components/dashboard/ActivityLog";
-import EquipmentStatusList from "@/components/dashboard/EquipmentStatusList";
-import PerformanceChart from "@/components/dashboard/PerformanceChart";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { CesiumMapWithData } from "@/components/CesiumMapWithData";
+import { WeatherMetrics } from "@/components/WeatherMetrics";
+import { ConversationBox } from "@/components/ConversationBox";
+import { RiskAssessmentPanel } from "@/components/training/RiskAssessmentPanel";
+import { useEffect, useMemo } from "react";
+import { Toaster } from "@/components/ui/toaster";
+import { initializeRealtimeServices } from "@/services/apiService";
+import "../styles/mapAnimations.css";
 
 const Index = () => {
-  const isMobile = useIsMobile();
+  const weatherMetrics = [
+    { type: "rain", value: 25, unit: "mm" },
+    { type: "wind", value: 15, unit: "km/h" },
+    { type: "clear", value: 28, unit: "°C" }
+  ];
 
+  // Add mock news items
+  const newsItems = [
+    "High risk detected in Maiduguri region - Population density increasing",
+    "Weather conditions in Lagos are favorable for population growth",
+    "Port Harcourt monitoring station reports elevated activity",
+    "New environmental data available for analyzed regions"
+  ];
+
+  const memoizedNewsItems = useMemo(() => newsItems, []);
+
+  useEffect(() => {
+    // Initialize real-time services
+    initializeRealtimeServices();
+    
+    // Simulate news scrolling
+    let currentIndex = 0;
+    const interval = setInterval(() => {
+      const newsElement = document.getElementById('news-ticker');
+      if(newsElement){
+        newsElement.textContent = memoizedNewsItems[currentIndex];
+        currentIndex = (currentIndex + 1) % memoizedNewsItems.length;
+      }
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, [memoizedNewsItems]);
+  
   return (
-    <div className="flex h-screen w-full flex-col bg-background">
-      <Navbar />
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          <div className="mx-auto max-w-7xl space-y-6">
-            <div>
-              <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-              <p className="text-muted-foreground">
-                Monitor and manage industrial equipment and systems
-              </p>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <StatCard
-                title="Active Equipment"
-                value="42/50"
-                description="Total operational units"
-                icon={<Cpu className="h-4 w-4" />}
-                trend="up"
-                trendValue="2 from yesterday"
-                status="active"
-              />
-              <StatCard
-                title="Average Performance"
-                value="87%"
-                description="Across all systems"
-                icon={<BarChart3 className="h-4 w-4" />}
-                trend="up"
-                trendValue="3% from last week"
-              />
-              <StatCard
-                title="Active Alerts"
-                value="3"
-                description="2 critical, 1 warning"
-                icon={<AlertCircle className="h-4 w-4" />}
-                trend="down"
-                trendValue="1 from yesterday"
-                status="alert"
-              />
-              <StatCard
-                title="Fleet Status"
-                value="12/15"
-                description="Vehicles in operation"
-                icon={<Truck className="h-4 w-4" />}
-                trend="neutral"
-                trendValue="Same as yesterday"
-                status="active"
-              />
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-7">
-              <div className="md:col-span-4">
-                <PerformanceChart />
-              </div>
-              <div className="md:col-span-3">
-                <ActivityLog />
-              </div>
-            </div>
-
-            <div>
-              <EquipmentStatusList />
-            </div>
-          </div>
-        </main>
+    <div className="w-full h-screen overflow-hidden">
+      <CesiumMapWithData />
+      
+      <div className="absolute top-4 left-4 w-72">
+        <RiskAssessmentPanel />
       </div>
+      
+      {/* Weather metrics */}
+      <div className="w-full top-5 h-screen overflow-hidden">
+          <WeatherMetrics metrics={weatherMetrics} />
+      </div>    
+      
+      {/* News ticker at bottom */}
+      <div className="fixed bottom-15 left-0 right-0 bg-black/40 backdrop-blur-sm border-t border-gray-800 z-50">
+        <div className="container mx-auto py-2 px-4 flex items-center">
+          <div className="bg-red-600 text-white px-2 py-0.5 rounded text-xs font-medium mr-3">
+            ALERT
+          </div>
+          <div id="news-ticker" className="text-sm text-gray-200 transition-all duration-1000">
+            {newsItems[0]}
+          </div>
+        </div>
+      </div>
+      
+      <ConversationBox />
+      <Toaster />
     </div>
   );
 };
