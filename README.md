@@ -1,69 +1,98 @@
-# Welcome to your Lovable project
 
-## Project info
+# Mastomys Natalensis Tracking System
 
-**URL**: https://lovable.dev/projects/4d763399-4243-445d-b152-125809ecbfda
+This application provides tools for tracking Mastomys Natalensis populations, analyzing ecological trends, and supporting Lassa fever outbreak management.
 
-## How can I edit this code?
+## Project Structure
 
-There are several ways of editing your application.
+The application consists of:
 
-**Use Lovable**
+- **Frontend**: React application with Cesium map integration
+- **Backend**: Multiple Python services including an API server, agent server, and AI integration
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/4d763399-4243-445d-b152-125809ecbfda) and start prompting.
+## Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js (v14 or later)
+- Python 3.8 or later
+- npm or yarn
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. Clone the repository:
+   ```
+   git clone <repository-url>
+   cd <repository-folder>
+   ```
 
-Follow these steps:
+2. Install frontend dependencies:
+   ```
+   npm install
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+3. Install backend dependencies:
+   ```
+   cd Backend
+   pip install -r requirements.txt
+   cd ..
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Running the Application
 
-# Step 3: Install the necessary dependencies.
-npm i
+#### Option 1: Using the provided scripts
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+On Linux/Mac:
+```
+./start-dev.sh
 ```
 
-**Edit a file directly in GitHub**
+On Windows:
+```
+start-dev.bat
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+#### Option 2: Manual startup
 
-**Use GitHub Codespaces**
+1. Start the backend servers:
+   ```
+   cd Backend
+   python run_backend.py
+   ```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+2. In a new terminal, start the frontend:
+   ```
+   npm run dev
+   ```
 
-## What technologies are used for this project?
+3. The application should be available at http://localhost:5173 by default
 
-This project is built with .
+### Environment Setup
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Make sure all the required environment variables are set correctly:
 
-## How can I deploy this project?
+1. Supabase configuration
+2. API configuration
+3. OpenAI configuration
+4. Weather API configuration
+5. Cesium configuration
 
-Simply open [Lovable](https://lovable.dev/projects/4d763399-4243-445d-b152-125809ecbfda) and click on Share -> Publish.
+Refer to `.env.example` for a list of required variables.
 
-## I want to use a custom domain - is that possible?
+## Features
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+- 3D visualization of tracking data
+- Real-time wind pattern analysis
+- AI-powered risk assessment
+- Weather and environmental condition monitoring
+- Training interface for machine learning models
+
+## Backend Services
+
+The backend consists of multiple services:
+
+- **API Server**: Handles main application endpoints
+- **Agent Server**: Processes agent-specific operations
+- **DeepSeek Integration**: Provides AI language model capabilities
+
+For more detailed information, see `Backend/README.md`.
