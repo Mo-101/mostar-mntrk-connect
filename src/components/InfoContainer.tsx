@@ -33,18 +33,41 @@ export function InfoContainer({ className }: InfoContainerProps) {
           
           if (data) {
             // Transform the data to match RiskAssessment type
-            const transformedData: RiskAssessment[] = data.map(item => ({
-              id: item.id,
-              region: item.location_id ? `Region ${item.location_id}` : 'Unknown',
-              risk_level: item.risk_level as 'LOW' | 'MEDIUM' | 'HIGH',
-              assessment_date: item.assessment_date,
-              mitigation_measures: item.mitigation_measures || [],
-              details: {
-                environmental_factors: (typeof item.factors === 'object' && item.factors?.environmental_factors) || [],
-                population_density: (typeof item.factors === 'object' && item.factors?.population_density) || 0,
-                historical_data: (typeof item.factors === 'object' && item.factors?.historical_data) || ''
+            const transformedData: RiskAssessment[] = data.map(item => {
+              // Safely access nested properties
+              let environmentalFactors: string[] = [];
+              let populationDensity = 0;
+              let historicalData = '';
+              
+              // Check if factors exists and is an object
+              if (item.factors && typeof item.factors === 'object') {
+                // Access properties safely with optional chaining
+                environmentalFactors = Array.isArray(item.factors.environmental_factors) 
+                  ? item.factors.environmental_factors 
+                  : [];
+                  
+                populationDensity = typeof item.factors.population_density === 'number'
+                  ? item.factors.population_density
+                  : 0;
+                  
+                historicalData = typeof item.factors.historical_data === 'string'
+                  ? item.factors.historical_data
+                  : '';
               }
-            }));
+              
+              return {
+                id: item.id,
+                region: item.location_id ? `Region ${item.location_id}` : 'Unknown',
+                risk_level: item.risk_level as 'LOW' | 'MEDIUM' | 'HIGH',
+                assessment_date: item.assessment_date,
+                mitigation_measures: item.mitigation_measures || [],
+                details: {
+                  environmental_factors: environmentalFactors,
+                  population_density: populationDensity,
+                  historical_data: historicalData
+                }
+              };
+            });
             
             setAlerts(transformedData);
           }

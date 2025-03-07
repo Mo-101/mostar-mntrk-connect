@@ -2,6 +2,8 @@
 // Define the proper exports and functions for the useApi hook
 import { supabase, USE_MOCK_DATA } from "@/integrations/supabase/client";
 import { useState } from "react";
+import { RiskAssessment, DeepSeekAnalysis, TrainingMetric } from "@/types/api";
+import { RealtimeService } from "@/services/apiService";
 
 // Only updating the channelToTable function to fix the error related to 'wind_data' table
 const channelToTable = (channel: string): string | null => {
@@ -68,6 +70,113 @@ const mockResponses: Record<string, any> = {
         weather: ["Clear", "Clouds", "Rain"][Math.floor(Math.random() * 3)]
       }))
     })
+  },
+  riskAssessments: {
+    getLatest: () => ({
+      success: true,
+      data: [
+        {
+          id: 1,
+          region: "Lagos",
+          risk_level: "MEDIUM",
+          assessment_date: new Date().toISOString(),
+          mitigation_measures: [
+            "Increase environmental monitoring frequency",
+            "Deploy additional surveillance sensors",
+            "Implement community reporting system"
+          ],
+          details: {
+            environmental_factors: ["Moderate rainfall", "Urban density"],
+            population_density: 1265,
+            historical_data: "Moderate risk patterns identified"
+          }
+        }
+      ]
+    })
+  },
+  trainingMetrics: {
+    getLatest: () => ({
+      success: true,
+      data: {
+        id: 1,
+        epoch: 25,
+        accuracy: 0.85,
+        loss: 0.15,
+        val_accuracy: 0.82,
+        val_loss: 0.18,
+        timestamp: new Date().toISOString()
+      }
+    })
+  }
+};
+
+// Create a mock deepseek client
+const mockDeepSeekClient = {
+  analyze: async (prompt: string, useMock = true): Promise<DeepSeekAnalysis> => {
+    // Add a small delay to simulate API call
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    return {
+      response: `Analysis of "${prompt}" complete. Weather patterns indicate seasonal changes affecting monitoring regions.`,
+      metadata: {
+        category: ["migration", "environmental", "outbreak_prediction"][Math.floor(Math.random() * 3)],
+        confidence: 0.75 + Math.random() * 0.2,
+        regions_affected: ["Lagos", "Abuja", "Kano"].slice(0, Math.floor(Math.random() * 3) + 1),
+        risk_level: ["LOW", "MEDIUM", "HIGH"][Math.floor(Math.random() * 3)],
+        processing_time: 0.8 + Math.random(),
+        source: "mock_data"
+      }
+    };
+  }
+};
+
+// Create a mock realtime service
+const mockRealtimeService = {
+  subscribe: (channel: string, callback: (data: any) => void) => {
+    console.log(`Subscribed to ${channel} channel`);
+    
+    // For training-update channel, simulate periodic updates
+    if (channel === 'training-update') {
+      const interval = setInterval(() => {
+        const currentEpoch = Math.floor(Math.random() * 50) + 1;
+        const accuracy = Math.min(0.5 + (currentEpoch / 50) * 0.45, 0.95);
+        const loss = Math.max(0.5 - (currentEpoch / 50) * 0.45, 0.05);
+        
+        callback({
+          epoch: currentEpoch,
+          accuracy,
+          loss
+        });
+      }, 10000);
+      
+      // Return unsubscribe function
+      return () => clearInterval(interval);
+    }
+    
+    // For risk-assessment channel, simulate occasional updates
+    if (channel === 'risk-assessment') {
+      const interval = setInterval(() => {
+        callback([{
+          id: Date.now(),
+          region: ["Lagos", "Abuja", "Kano"][Math.floor(Math.random() * 3)],
+          risk_level: ["LOW", "MEDIUM", "HIGH"][Math.floor(Math.random() * 3)],
+          assessment_date: new Date().toISOString(),
+          mitigation_measures: [
+            "Increase environmental monitoring frequency",
+            "Deploy additional surveillance sensors"
+          ]
+        }]);
+      }, 30000);
+      
+      return () => clearInterval(interval);
+    }
+    
+    // Default unsubscribe function
+    return () => console.log(`Unsubscribed from ${channel} channel`);
+  },
+  
+  send: (channel: string, data: any) => {
+    console.log(`Sending to ${channel} channel:`, data);
   }
 };
 
@@ -112,6 +221,69 @@ const api = {
         return { success: false, error: 'Failed to fetch wind data' };
       }
     }
+  },
+  riskAssessments: {
+    getLatest: async () => {
+      if (USE_MOCK_DATA) {
+        return mockResponses.riskAssessments.getLatest().data;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from('risk_assessments')
+          .select('*')
+          .order('assessment_date', { ascending: false })
+          .limit(3);
+          
+        if (error) throw error;
+        return data.map((item: any) => ({
+          id: item.id,
+          region: item.location_id ? `Region ${item.location_id}` : 'Unknown',
+          risk_level: item.risk_level.toUpperCase(),
+          assessment_date: item.assessment_date,
+          mitigation_measures: item.mitigation_measures || [],
+          details: {
+            environmental_factors: (typeof item.factors === 'object' && item.factors?.environmental_factors) || [],
+            population_density: (typeof item.factors === 'object' && item.factors?.population_density) || 0,
+            historical_data: (typeof item.factors === 'object' && item.factors?.historical_data) || ''
+          }
+        }));
+      } catch (error) {
+        console.error('Error fetching risk assessments:', error);
+        return [];
+      }
+    }
+  },
+  trainingMetrics: {
+    getLatest: async () => {
+      if (USE_MOCK_DATA) {
+        return mockResponses.trainingMetrics.getLatest().data;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from('training_metrics')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+          
+        if (error) throw error;
+        
+        return {
+          id: data.id,
+          epoch: data.epoch,
+          accuracy: data.accuracy,
+          loss: data.loss,
+          val_accuracy: data.val_accuracy,
+          val_loss: data.val_loss,
+          timestamp: data.created_at
+        };
+      } catch (error) {
+        console.error('Error fetching training metrics:', error);
+        return mockResponses.trainingMetrics.getLatest().data;
+      }
+    }
   }
 };
 
@@ -119,6 +291,7 @@ const api = {
 export const useApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState(false); // Add isLoading state for ConversationBox
 
   // General-purpose API call function
   const apiCall = async <T extends unknown>(
@@ -126,6 +299,7 @@ export const useApi = () => {
     errorMessage = "API call failed"
   ): Promise<T | null> => {
     setLoading(true);
+    setIsLoading(true);
     setError(null);
     
     try {
@@ -136,10 +310,35 @@ export const useApi = () => {
       return null;
     } finally {
       setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  return { apiCall, loading, error, api };
+  // Add deepSeek client for the DeepSeekInsights component
+  const deepSeek = {
+    analyze: async (prompt: string, useMock = true): Promise<DeepSeekAnalysis> => {
+      setIsLoading(true);
+      try {
+        if (USE_MOCK_DATA || useMock) {
+          const response = await mockDeepSeekClient.analyze(prompt);
+          return response;
+        }
+        
+        // Add real implementation here when needed
+        throw new Error("Real DeepSeek API not implemented");
+      } catch (error) {
+        console.error("Error calling DeepSeek API:", error);
+        return mockDeepSeekClient.analyze(prompt, true);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  // Add realtime service for components that need it
+  const realtime = mockRealtimeService;
+
+  return { apiCall, loading, error, api, deepSeek, isLoading, realtime };
 };
 
 // Also export the api object directly for simpler imports

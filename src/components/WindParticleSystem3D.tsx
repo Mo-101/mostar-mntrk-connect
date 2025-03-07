@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState } from 'react';
-import { Color, Cartesian3, ParticleSystem, Particle, CircleEmitter } from 'cesium';
+import { Color, Cartesian3, ParticleSystem, Particle, CircleEmitter, Matrix4 } from 'cesium';
 import { useApi } from "@/hooks/useApi";
 import { WindDataPoint } from '@/types/api';
 import { supabase, USE_MOCK_DATA, OPENWEATHER_API_KEY } from '@/integrations/supabase/client';
@@ -245,11 +245,12 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
         emissionRate: particleCount / 5,
         lifetime: 16.0,
         emitter: new CircleEmitter(600.0),
-        modelMatrix: Cartesian3.fromDegrees(
-          point.position.longitude,
-          point.position.latitude,
-          point.position.altitude,
-          undefined
+        modelMatrix: Matrix4.fromTranslation(
+          Cartesian3.fromDegrees(
+            point.position.longitude,
+            point.position.latitude,
+            point.position.altitude
+          )
         ),
         emitterModelMatrix: calculateEmitterMatrix(point.direction)
       });
@@ -307,8 +308,7 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
     // Convert wind direction to radians
     const directionRadians = windDirection * Math.PI / 180;
     
-    // This would be replaced with proper matrix calculation
-    // For now, returning null which will use default identity matrix
+    // Return undefined for identity matrix (default behavior)
     return undefined;
   };
   
