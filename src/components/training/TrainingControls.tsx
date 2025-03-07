@@ -1,10 +1,12 @@
 
 import { useState, useEffect } from 'react';
-import { Play, Pause, RotateCcw, ChevronRight } from 'lucide-react';
 import { useApi } from '@/hooks/useApi';
 import { TrainingMetric } from '@/types/api';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { TrainingProgress } from './TrainingProgress';
+import { ConnectionStatus } from './ConnectionStatus';
+import { TrainingActions } from './TrainingActions';
 
 export function TrainingControls() {
   const { apiCall, api, realtime } = useApi();
@@ -238,69 +240,21 @@ export function TrainingControls() {
     <div className="p-4 bg-[#1C2333] rounded-md">
       <h3 className="text-sm font-medium text-gray-200 mb-4">Training Controls</h3>
       
-      <div className="mb-4">
-        <div className="flex justify-between text-xs text-gray-400 mb-1">
-          <span>Progress</span>
-          <span>{currentEpoch} / {totalEpochs} epochs</span>
-        </div>
-        <div className="w-full bg-gray-700 rounded-full h-2">
-          <div 
-            className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${(currentEpoch / totalEpochs) * 100}%` }}
-          ></div>
-        </div>
-      </div>
+      <TrainingProgress 
+        currentEpoch={currentEpoch}
+        totalEpochs={totalEpochs}
+        accuracy={accuracy}
+        loss={loss}
+      />
       
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div className="bg-[#262E45] p-3 rounded-md">
-          <div className="text-xs text-gray-400 mb-1">Accuracy</div>
-          <div className="text-lg font-bold text-gray-200">{accuracy.toFixed(2)}%</div>
-        </div>
-        <div className="bg-[#262E45] p-3 rounded-md">
-          <div className="text-xs text-gray-400 mb-1">Loss</div>
-          <div className="text-lg font-bold text-gray-200">{loss.toFixed(4)}</div>
-        </div>
-      </div>
+      <ConnectionStatus isConnected={isConnected} />
       
-      {/* Connection status indicator */}
-      <div className="mb-4 flex items-center justify-between">
-        <span className="text-xs text-gray-400">Database Connection:</span>
-        <span className={`text-xs font-medium ${isConnected ? 'text-green-500' : 'text-amber-500'}`}>
-          {isConnected ? 'Connected to Supabase' : 'Using Mock Data'}
-        </span>
-      </div>
-      
-      <div className="flex space-x-2">
-        {!isTraining ? (
-          <button 
-            onClick={handleStartTraining}
-            className="flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md flex-1 transition-colors"
-          >
-            <Play className="w-4 h-4 mr-2" />
-            Start Training
-          </button>
-        ) : (
-          <button 
-            onClick={handlePauseTraining}
-            className="flex items-center justify-center bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-md flex-1 transition-colors"
-          >
-            <Pause className="w-4 h-4 mr-2" />
-            Pause
-          </button>
-        )}
-        
-        <button 
-          onClick={handleResetTraining}
-          className="flex items-center justify-center bg-gray-600 hover:bg-gray-700 text-white p-2 rounded-md"
-        >
-          <RotateCcw className="w-4 h-4" />
-        </button>
-      </div>
-      
-      <button className="mt-4 w-full flex items-center justify-between text-xs bg-[#262E45] hover:bg-[#303A57] text-gray-300 p-2 rounded transition-colors">
-        <span>View Detailed Training Metrics</span>
-        <ChevronRight className="w-4 h-4" />
-      </button>
+      <TrainingActions
+        isTraining={isTraining}
+        onStartTraining={handleStartTraining}
+        onPauseTraining={handlePauseTraining}
+        onResetTraining={handleResetTraining}
+      />
     </div>
   );
 }
