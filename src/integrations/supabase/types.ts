@@ -406,6 +406,36 @@ export type Database = {
         }
         Relationships: []
       }
+      training_metrics: {
+        Row: {
+          accuracy: number
+          created_at: string | null
+          epoch: number
+          id: string
+          loss: number
+          metadata: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          accuracy: number
+          created_at?: string | null
+          epoch: number
+          id?: string
+          loss: number
+          metadata?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          accuracy?: number
+          created_at?: string | null
+          epoch?: number
+          id?: string
+          loss?: number
+          metadata?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       training_modules: {
         Row: {
           created_at: string | null
