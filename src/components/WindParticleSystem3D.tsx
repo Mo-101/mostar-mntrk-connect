@@ -122,7 +122,15 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
   };
   
   useEffect(() => {
-    if (!viewer) return;
+    if (!viewer) {
+      console.log("Viewer is not available for WindParticleSystem3D");
+      return;
+    }
+    
+    if (!viewer.scene) {
+      console.log("Viewer scene is not available for WindParticleSystem3D");
+      return;
+    }
     
     const initializeParticleSystem = async () => {
       try {
@@ -210,11 +218,18 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
   
   // Function to create the particle system
   const createParticleSystem = (windData: WindDataPoint[], weather: WeatherData) => {
-    if (!viewer || !windData.length) return;
+    if (!viewer || !viewer.scene || !windData.length) {
+      console.log("Cannot create particle system: missing required elements");
+      return;
+    }
     
     // Remove existing particle system if any
     if (windParticlesRef.current) {
-      viewer.scene.primitives.remove(windParticlesRef.current);
+      try {
+        viewer.scene.primitives.remove(windParticlesRef.current);
+      } catch (error) {
+        console.error("Error removing existing particle system:", error);
+      }
     }
     
     // Get wind speed and adjust particle count based on it
@@ -222,66 +237,74 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
     const particleCount = Math.min(5000, Math.max(1000, Math.floor(windSpeed * 300)));
     
     // Create a particle system for each wind data point
-    windData.forEach((point, index) => {
-      // Convert to Cesium coordinates
-      const position = Cartesian3.fromDegrees(
-        point.position.longitude, 
-        point.position.latitude, 
-        point.position.altitude
-      );
+    try {
+      windParticlesRef.current = [];
       
-      // Create particle system
-      const particleSystem = new ParticleSystem({
-        image: '/particle.png',
-        startColor: getColorForWeather(weather.weather[0].main),
-        endColor: new Color(1.0, 1.0, 1.0, 0.0),
-        startScale: 1.5,
-        endScale: 5.0,
-        minimumParticleLife: 1.0,
-        maximumParticleLife: 5.0,
-        minimumSpeed: Math.max(1, windSpeed * 20),
-        maximumSpeed: Math.max(5, windSpeed * 40),
-        imageSize: new Cartesian3(15.0, 15.0, 15.0),
-        emissionRate: particleCount / 5,
-        lifetime: 16.0,
-        emitter: new CircleEmitter(600.0),
-        modelMatrix: Matrix4.fromTranslation(
-          Cartesian3.fromDegrees(
-            point.position.longitude,
-            point.position.latitude,
-            point.position.altitude
-          )
-        ),
-        emitterModelMatrix: calculateEmitterMatrix(point.direction)
+      windData.forEach((point, index) => {
+        // Convert to Cesium coordinates
+        const position = Cartesian3.fromDegrees(
+          point.position.longitude, 
+          point.position.latitude, 
+          point.position.altitude
+        );
+        
+        // Create particle system
+        const particleSystem = new ParticleSystem({
+          image: '/particle.png',
+          startColor: getColorForWeather(weather.weather[0].main),
+          endColor: new Color(1.0, 1.0, 1.0, 0.0),
+          startScale: 1.5,
+          endScale: 5.0,
+          minimumParticleLife: 1.0,
+          maximumParticleLife: 5.0,
+          minimumSpeed: Math.max(1, windSpeed * 20),
+          maximumSpeed: Math.max(5, windSpeed * 40),
+          imageSize: new Cartesian3(15.0, 15.0, 15.0),
+          emissionRate: particleCount / 5,
+          lifetime: 16.0,
+          emitter: new CircleEmitter(600.0),
+          modelMatrix: Matrix4.fromTranslation(
+            Cartesian3.fromDegrees(
+              point.position.longitude,
+              point.position.latitude,
+              point.position.altitude
+            )
+          ),
+          emitterModelMatrix: calculateEmitterMatrix(point.direction)
+        });
+        
+        // Add to scene
+        try {
+          viewer.scene.primitives.add(particleSystem);
+          windParticlesRef.current.push(particleSystem);
+        } catch (error) {
+          console.error("Error adding particle system to scene:", error);
+        }
       });
-      
-      // Add to scene
-      viewer.scene.primitives.add(particleSystem);
-      
-      // Store reference to all particle systems
-      if (!windParticlesRef.current) {
-        windParticlesRef.current = [];
-      }
-      
-      windParticlesRef.current.push(particleSystem);
-    });
+    } catch (error) {
+      console.error("Error creating particle systems:", error);
+    }
   };
   
   // Function to update an existing particle system
   const updateParticleSystem = (windData: WindDataPoint[], weather: WeatherData) => {
-    if (!viewer || !windData.length || !windParticlesRef.current) return;
+    if (!viewer || !viewer.scene || !windData.length || !windParticlesRef.current) return;
     
     // Clean up old systems
-    if (Array.isArray(windParticlesRef.current)) {
-      windParticlesRef.current.forEach((system) => {
-        viewer.scene.primitives.remove(system);
-      });
-    } else {
-      viewer.scene.primitives.remove(windParticlesRef.current);
+    try {
+      if (Array.isArray(windParticlesRef.current)) {
+        windParticlesRef.current.forEach((system) => {
+          viewer.scene.primitives.remove(system);
+        });
+      } else {
+        viewer.scene.primitives.remove(windParticlesRef.current);
+      }
+      
+      // Create new systems with updated data
+      createParticleSystem(windData, weather);
+    } catch (error) {
+      console.error("Error updating particle system:", error);
     }
-    
-    // Create new systems with updated data
-    createParticleSystem(windData, weather);
   };
   
   // Function to get color based on weather condition

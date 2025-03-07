@@ -58,7 +58,14 @@ export const CesiumMap = () => {
     });
 
     // Set initial camera position
-    viewer.camera.flyTo();
+    viewer.camera.flyTo({
+      destination: Cartesian3.fromDegrees(9.0765, 7.3986, 1500000),
+      orientation: {
+        heading: 0.0,
+        pitch: -0.5,
+        roll: 0.0
+      }
+    });
 
     // Clean up
     return () => {
