@@ -37,7 +37,7 @@ export const CesiumMap = () => {
     const nigeriaCenter = Cartesian3.fromDegrees(8.6753, 9.0820, 1000000);
     const boundingSphere = new BoundingSphere(nigeriaCenter, 1000000);
     
-    // Fixed: Removed the argument to flyToBoundingSphere
+    // Modified: Removed the argument to flyToBoundingSphere
     viewer.camera.flyToBoundingSphere(boundingSphere);
 
     // Clean up

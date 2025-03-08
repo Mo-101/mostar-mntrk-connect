@@ -65,7 +65,7 @@ export const CesiumMap = () => {
       normalOffset: false
     });
 
-    // Fixed: Removed the argument to flyTo to fix TS2554 error
+    // Modified: Corrected the flyTo method call to use the options object directly
     viewer.camera.flyTo({
       destination: Cartesian3.fromDegrees(9.0765, 7.3986, 1500000),
       orientation: {
