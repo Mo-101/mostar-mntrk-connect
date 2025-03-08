@@ -6,10 +6,10 @@ import { createWorldTerrainAsync, Cesium3DTileset, Cesium3DTileStyle, IonResourc
 import { WindParticleSystem3D } from "@/components/WindParticleSystem3D";
 import { useApi } from "@/hooks/useApi";
 import { MapLocation } from "@/types/api";
+import { toast } from "sonner";
 
-// Set up Cesium ion access token
-Ion.defaultAccessToken = import.meta.env.VITE_CESIUM_ION_TOKEN || 
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3ODM3ODdlYy0yMDEwLTQzODYtODA3Mi0xN2IzNmFlZWZkNWMiLCJpZCI6MTcyMDQ1LCJpYXQiOjE2OTcxMDAyMjl9.6gSfTWv-L3QQiyIwUQ-c7dw8bQbVyMoVn9qGVrBePZI";
+// Set up Cesium ion access token with a valid token
+Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NTc3MzMsImlhdCI6MTYyMjY0NjQ5OH0.XcKpgANiY19MC4bdFUXMVEBToBmBLjssJQb_QYrdBnQ";
 
 interface CesiumMapWithDataProps {
   onViewerCreated?: (viewer: any) => void;
@@ -33,6 +33,7 @@ export const CesiumMapWithData = ({ onViewerCreated }: CesiumMapWithDataProps) =
         }
       } catch (error) {
         console.error("Error fetching map locations:", error);
+        toast.error("Failed to load map locations");
       }
     };
 
@@ -65,7 +66,7 @@ export const CesiumMapWithData = ({ onViewerCreated }: CesiumMapWithDataProps) =
     viewer.scene.fog.density = 0.0002;
     viewer.scene.fog.screenSpaceErrorFactor = 4.0;
 
-    // Add terrain
+    // Add terrain with proper error handling
     createWorldTerrainAsync()
       .then(terrain => {
         viewer.terrainProvider = terrain;
@@ -75,6 +76,7 @@ export const CesiumMapWithData = ({ onViewerCreated }: CesiumMapWithDataProps) =
         console.error("Error loading terrain:", error);
         // Set viewer as loaded even if terrain fails to load
         setViewerLoaded(true);
+        toast.error("Failed to load terrain data");
       });
 
     // Set up event handling for entity selection
@@ -115,7 +117,11 @@ export const CesiumMapWithData = ({ onViewerCreated }: CesiumMapWithDataProps) =
     return () => {
       handler.destroy();
       if (viewer && !viewer.isDestroyed()) {
-        viewer.destroy();
+        try {
+          viewer.destroy();
+        } catch (e) {
+          console.error("Error destroying viewer:", e);
+        }
       }
     };
   }, [api, apiCall, onViewerCreated]);

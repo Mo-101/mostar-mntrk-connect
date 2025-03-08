@@ -177,8 +177,10 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
           windData = convertToWindData(weather);
         }
         
-        // Create particle system
-        createParticleSystem(windData, weather);
+        if (viewer && !viewer.isDestroyed()) {
+          // Create particle system
+          createParticleSystem(windData, weather);
+        }
         
         // Store wind data if needed
         if (!USE_MOCK_DATA) {
@@ -206,6 +208,15 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
     // Set up update timer (every 30 seconds)
     updateTimerRef.current = window.setInterval(async () => {
       try {
+        if (!viewer || viewer.isDestroyed()) {
+          // If viewer is no longer valid, clear the interval
+          if (updateTimerRef.current) {
+            clearInterval(updateTimerRef.current);
+            updateTimerRef.current = null;
+          }
+          return;
+        }
+        
         const weather = await fetchWeatherData();
         const windData = convertToWindData(weather);
         
@@ -225,6 +236,7 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
     return () => {
       if (updateTimerRef.current) {
         clearInterval(updateTimerRef.current);
+        updateTimerRef.current = null;
       }
       
       if (windParticlesRef.current) {
@@ -250,8 +262,8 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
   
   // Function to create the particle system
   const createParticleSystem = (windData: WindDataPoint[], weather: WeatherData) => {
-    if (!viewer || !viewerReady) {
-      console.log("Cannot create particle system: viewer not ready");
+    if (!viewer || !viewerReady || viewer.isDestroyed()) {
+      console.log("Cannot create particle system: viewer not ready or destroyed");
       return;
     }
     

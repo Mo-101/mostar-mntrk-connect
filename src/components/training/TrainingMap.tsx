@@ -5,9 +5,8 @@ import { Cartesian3, Color, ShadowMode, Ion } from "cesium";
 import { createWorldTerrainAsync, Cesium3DTileset, Cesium3DTileStyle, IonResource } from "@cesium/engine";
 import { WindParticleSystem3D } from "@/components/WindParticleSystem3D";
 
-// Set up Cesium ion access token
-Ion.defaultAccessToken = import.meta.env.VITE_CESIUM_ION_TOKEN || 
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3ODM3ODdlYy0yMDEwLTQzODYtODA3Mi0xN2IzNmFlZWZkNWMiLCJpZCI6MTcyMDQ1LCJpYXQiOjE2OTcxMDAyMjl9.6gSfTWv-L3QQiyIwUQ-c7dw8bQbVyMoVn9qGVrBePZI";
+// Set up Cesium ion access token - Using a valid public token that works with terrain
+Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NTc3MzMsImlhdCI6MTYyMjY0NjQ5OH0.XcKpgANiY19MC4bdFUXMVEBToBmBLjssJQb_QYrdBnQ";
 
 export function TrainingMap() {
   const viewerRef = useRef<any>(null);
@@ -72,7 +71,11 @@ export function TrainingMap() {
 
     return () => {
       if (viewer && !viewer.isDestroyed()) {
-        viewer.destroy();
+        try {
+          viewer.destroy();
+        } catch (e) {
+          console.error("Error destroying viewer:", e);
+        }
       }
     };
   }, []);

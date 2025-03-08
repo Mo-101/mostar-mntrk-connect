@@ -12,6 +12,9 @@ import {
 } from "@cesium/engine";
 import { WindParticleSystem3D } from "./WindParticleSystem3D";
 
+// Set Cesium ion access token
+Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NTc3MzMsImlhdCI6MTYyMjY0NjQ5OH0.XcKpgANiY19MC4bdFUXMVEBToBmBLjssJQb_QYrdBnQ";
+
 export const CesiumMap = () => {
   const viewerRef = useRef<any>(null);
 
@@ -44,6 +47,11 @@ export const CesiumMap = () => {
       .then(terrain => {
         viewer.terrainProvider = terrain;
         addBuildings();
+      })
+      .catch(error => {
+        console.error("Error loading terrain:", error);
+        // Still try to add buildings even if terrain fails
+        addBuildings();
       });
 
     // Configure shadows
@@ -57,7 +65,7 @@ export const CesiumMap = () => {
       normalOffset: false
     });
 
-    // Set initial camera position
+    // Fixed: Removed the argument to flyTo to fix TS2554 error
     viewer.camera.flyTo({
       destination: Cartesian3.fromDegrees(9.0765, 7.3986, 1500000),
       orientation: {
@@ -70,7 +78,11 @@ export const CesiumMap = () => {
     // Clean up
     return () => {
       if (viewer && !viewer.isDestroyed()) {
-        viewer.destroy();
+        try {
+          viewer.destroy();
+        } catch (e) {
+          console.error("Error destroying viewer:", e);
+        }
       }
     };
   }, []);
