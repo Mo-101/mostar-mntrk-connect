@@ -65,7 +65,7 @@ export const CesiumMap = () => {
       normalOffset: false
     });
 
-    // Modified: Corrected the flyTo method call to use the options object directly
+    // Fixed: Using the correct format for flyTo
     viewer.camera.flyTo({
       destination: Cartesian3.fromDegrees(9.0765, 7.3986, 1500000),
       orientation: {
