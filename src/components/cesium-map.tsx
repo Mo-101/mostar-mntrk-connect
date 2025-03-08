@@ -10,10 +10,10 @@ import {
   ShadowMap,
   Color
 } from "@cesium/engine";
-import { WindParticleSystem3D } from "./WindParticleSystem3D";
+import { WindParticleSystem3D } from "@/components/WindParticleSystem3D";
 
 // Set Cesium ion access token
-Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NTc3MzMsImlhdCI6MTYyMjY0NjQ5OH0.XcKpgANiY19MC4bdFUXMVEBToBmBLjssJQb_QYrdBnQ";
+Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0ZWI5ZDk2OS05YmVhLTRkZjEtOWI3Ny0wYzBkOTYzOGE0ZDYiLCJpZCI6MjA1MDQsImlhdCI6MTY5NzE0MDY3OX0.4oWPYI1VRCt_ZCt8e0X9i-YKxJl9qI1Rp5YJLAxLKmE";
 
 export const CesiumMap = () => {
   const viewerRef = useRef<any>(null);
@@ -65,7 +65,7 @@ export const CesiumMap = () => {
       normalOffset: false
     });
 
-    // Fixed: Using the correct format for flyTo
+    // Using the correct format for flyTo
     viewer.camera.flyTo({
       destination: Cartesian3.fromDegrees(9.0765, 7.3986, 1500000),
       orientation: {
@@ -104,7 +104,7 @@ export const CesiumMap = () => {
         shadows={true}
         className="cesium-viewer-dark"
       >
-        {viewerRef.current?.cesiumElement && (
+        {viewerRef.current?.cesiumElement && viewerRef.current.cesiumElement.scene && (
           <WindParticleSystem3D viewer={viewerRef.current.cesiumElement} />
         )}
       </Viewer>

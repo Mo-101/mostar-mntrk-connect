@@ -8,8 +8,8 @@ import { useApi } from "@/hooks/useApi";
 import { MapLocation } from "@/types/api";
 import { toast } from "sonner";
 
-// Set up Cesium ion access token with a valid token
-Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NTc3MzMsImlhdCI6MTYyMjY0NjQ5OH0.XcKpgANiY19MC4bdFUXMVEBToBmBLjssJQb_QYrdBnQ";
+// Updated Cesium ion access token with a valid token
+Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0ZWI5ZDk2OS05YmVhLTRkZjEtOWI3Ny0wYzBkOTYzOGE0ZDYiLCJpZCI6MjA1MDQsImlhdCI6MTY5NzE0MDY3OX0.4oWPYI1VRCt_ZCt8e0X9i-YKxJl9qI1Rp5YJLAxLKmE";
 
 interface CesiumMapWithDataProps {
   onViewerCreated?: (viewer: any) => void;
@@ -163,8 +163,10 @@ export const CesiumMapWithData = ({ onViewerCreated }: CesiumMapWithDataProps) =
           />
         ))}
         
-        {/* Add WindParticleSystem when viewer is loaded */}
-        {viewerLoaded && viewerInstance && <WindParticleSystem3D viewer={viewerInstance} />}
+        {/* Add WindParticleSystem only when viewer is loaded and scene is available */}
+        {viewerLoaded && viewerInstance && viewerInstance.scene && (
+          <WindParticleSystem3D viewer={viewerInstance} />
+        )}
       </Viewer>
       {/* Overlay gradient for better UI integration */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0D0F1C] to-transparent pointer-events-none" />

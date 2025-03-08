@@ -5,8 +5,8 @@ import { Cartesian3, Color, ShadowMode, Ion } from "cesium";
 import { createWorldTerrainAsync, Cesium3DTileset, Cesium3DTileStyle, IonResource } from "@cesium/engine";
 import { WindParticleSystem3D } from "@/components/WindParticleSystem3D";
 
-// Set up Cesium ion access token - Using a valid public token that works with terrain
-Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NTc3MzMsImlhdCI6MTYyMjY0NjQ5OH0.XcKpgANiY19MC4bdFUXMVEBToBmBLjssJQb_QYrdBnQ";
+// Updated Cesium ion access token - Using a valid public token that works with terrain
+Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0ZWI5ZDk2OS05YmVhLTRkZjEtOWI3Ny0wYzBkOTYzOGE0ZDYiLCJpZCI6MjA1MDQsImlhdCI6MTY5NzE0MDY3OX0.4oWPYI1VRCt_ZCt8e0X9i-YKxJl9qI1Rp5YJLAxLKmE";
 
 export function TrainingMap() {
   const viewerRef = useRef<any>(null);
@@ -35,7 +35,7 @@ export function TrainingMap() {
     viewer.scene.fog.density = 0.0002;
     viewer.scene.fog.screenSpaceErrorFactor = 4.0;
     
-    // Add terrain
+    // Add terrain with error handling
     createWorldTerrainAsync()
       .then(terrain => {
         viewer.terrainProvider = terrain;
@@ -94,7 +94,10 @@ export function TrainingMap() {
         geocoder={false}
         className="cesium-viewer-dark"
       >
-        {viewerLoaded && viewerInstance && <WindParticleSystem3D viewer={viewerInstance} />}
+        {/* Only render WindParticleSystem3D when the viewer is fully loaded */}
+        {viewerLoaded && viewerInstance && viewerInstance.scene && (
+          <WindParticleSystem3D viewer={viewerInstance} />
+        )}
       </Viewer>
       {/* Overlay gradient for better UI integration */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0D0F1C] to-transparent pointer-events-none" />
