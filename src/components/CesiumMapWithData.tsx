@@ -1,11 +1,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Viewer, Entity } from "resium";
-import { Cartesian3, Color, ScreenSpaceEventHandler, ScreenSpaceEventType } from "cesium";
+import { Cartesian3, Color, ScreenSpaceEventHandler, ScreenSpaceEventType, Ion } from "cesium";
 import { createWorldTerrainAsync, Cesium3DTileset, Cesium3DTileStyle, IonResource } from "@cesium/engine";
 import { WindParticleSystem3D } from "@/components/WindParticleSystem3D";
 import { useApi } from "@/hooks/useApi";
 import { MapLocation } from "@/types/api";
+
+// Set up Cesium ion access token
+Ion.defaultAccessToken = import.meta.env.VITE_CESIUM_ION_TOKEN || 
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3ODM3ODdlYy0yMDEwLTQzODYtODA3Mi0xN2IzNmFlZWZkNWMiLCJpZCI6MTcyMDQ1LCJpYXQiOjE2OTcxMDAyMjl9.6gSfTWv-L3QQiyIwUQ-c7dw8bQbVyMoVn9qGVrBePZI";
 
 interface CesiumMapWithDataProps {
   onViewerCreated?: (viewer: any) => void;
@@ -69,6 +73,8 @@ export const CesiumMapWithData = ({ onViewerCreated }: CesiumMapWithDataProps) =
       })
       .catch(error => {
         console.error("Error loading terrain:", error);
+        // Set viewer as loaded even if terrain fails to load
+        setViewerLoaded(true);
       });
 
     // Set up event handling for entity selection

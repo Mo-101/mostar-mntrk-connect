@@ -1,9 +1,13 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Viewer, Entity } from "resium";
-import { Cartesian3, Color, ShadowMode } from "cesium";
+import { Cartesian3, Color, ShadowMode, Ion } from "cesium";
 import { createWorldTerrainAsync, Cesium3DTileset, Cesium3DTileStyle, IonResource } from "@cesium/engine";
 import { WindParticleSystem3D } from "@/components/WindParticleSystem3D";
+
+// Set up Cesium ion access token
+Ion.defaultAccessToken = import.meta.env.VITE_CESIUM_ION_TOKEN || 
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3ODM3ODdlYy0yMDEwLTQzODYtODA3Mi0xN2IzNmFlZWZkNWMiLCJpZCI6MTcyMDQ1LCJpYXQiOjE2OTcxMDAyMjl9.6gSfTWv-L3QQiyIwUQ-c7dw8bQbVyMoVn9qGVrBePZI";
 
 export function TrainingMap() {
   const viewerRef = useRef<any>(null);
@@ -40,6 +44,8 @@ export function TrainingMap() {
       })
       .catch(error => {
         console.error("Error loading terrain:", error);
+        // Set viewer as loaded even if terrain fails
+        setViewerLoaded(true);
       });
 
     // Dynamic camera movement

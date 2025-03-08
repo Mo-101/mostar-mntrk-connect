@@ -30,6 +30,27 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
   const windParticlesRef = useRef<any>(null);
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const updateTimerRef = useRef<number | null>(null);
+  const [viewerReady, setViewerReady] = useState(false);
+  
+  // Check if viewer is ready
+  useEffect(() => {
+    if (!viewer) {
+      console.log("Viewer is not available for WindParticleSystem3D");
+      return;
+    }
+    
+    // Add a small delay to ensure the viewer is fully initialized
+    const checkViewerReady = () => {
+      if (viewer && viewer.scene) {
+        setViewerReady(true);
+      } else {
+        console.log("Viewer scene is not ready yet, waiting...");
+        setTimeout(checkViewerReady, 500);
+      }
+    };
+    
+    checkViewerReady();
+  }, [viewer]);
   
   // Function to fetch weather data from OpenWeather API
   const fetchWeatherData = async () => {
@@ -122,15 +143,12 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
   };
   
   useEffect(() => {
-    if (!viewer) {
-      console.log("Viewer is not available for WindParticleSystem3D");
+    // Only proceed if the viewer is ready
+    if (!viewerReady) {
       return;
     }
     
-    if (!viewer.scene) {
-      console.log("Viewer scene is not available for WindParticleSystem3D");
-      return;
-    }
+    console.log("Initializing wind particle system with viewer:", viewer);
     
     const initializeParticleSystem = async () => {
       try {
@@ -210,23 +228,55 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
       }
       
       if (windParticlesRef.current) {
-        viewer.scene.primitives.remove(windParticlesRef.current);
+        try {
+          if (viewer && viewer.scene && !viewer.isDestroyed()) {
+            if (Array.isArray(windParticlesRef.current)) {
+              windParticlesRef.current.forEach(system => {
+                if (viewer.scene.primitives.contains(system)) {
+                  viewer.scene.primitives.remove(system);
+                }
+              });
+            } else if (viewer.scene.primitives.contains(windParticlesRef.current)) {
+              viewer.scene.primitives.remove(windParticlesRef.current);
+            }
+          }
+        } catch (e) {
+          console.error("Error cleaning up wind particles:", e);
+        }
         windParticlesRef.current = null;
       }
     };
-  }, [viewer, api]);
+  }, [viewer, api, viewerReady]);
   
   // Function to create the particle system
   const createParticleSystem = (windData: WindDataPoint[], weather: WeatherData) => {
-    if (!viewer || !viewer.scene || !windData.length) {
-      console.log("Cannot create particle system: missing required elements");
+    if (!viewer || !viewerReady) {
+      console.log("Cannot create particle system: viewer not ready");
+      return;
+    }
+    
+    if (!viewer.scene) {
+      console.log("Cannot create particle system: viewer.scene is undefined");
+      return;
+    }
+    
+    if (!windData || !windData.length) {
+      console.log("Cannot create particle system: no wind data available");
       return;
     }
     
     // Remove existing particle system if any
     if (windParticlesRef.current) {
       try {
-        viewer.scene.primitives.remove(windParticlesRef.current);
+        if (Array.isArray(windParticlesRef.current)) {
+          windParticlesRef.current.forEach(system => {
+            if (viewer.scene.primitives.contains(system)) {
+              viewer.scene.primitives.remove(system);
+            }
+          });
+        } else if (viewer.scene.primitives.contains(windParticlesRef.current)) {
+          viewer.scene.primitives.remove(windParticlesRef.current);
+        }
       } catch (error) {
         console.error("Error removing existing particle system:", error);
       }
@@ -294,9 +344,11 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
     try {
       if (Array.isArray(windParticlesRef.current)) {
         windParticlesRef.current.forEach((system) => {
-          viewer.scene.primitives.remove(system);
+          if (viewer.scene.primitives.contains(system)) {
+            viewer.scene.primitives.remove(system);
+          }
         });
-      } else {
+      } else if (viewer.scene.primitives.contains(windParticlesRef.current)) {
         viewer.scene.primitives.remove(windParticlesRef.current);
       }
       
