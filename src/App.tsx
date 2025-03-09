@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import { CesiumMapWithData } from "./components/CesiumMapWithData";
@@ -8,6 +9,7 @@ import { initializeRealtimeServices, fetchWeatherData, analyzeRiskLevels } from 
 import { Toaster } from "./components/ui/toaster";
 import FuturisticHUD from "./components/FuturisticHUD";
 import FuturisticMapOverlay from "./components/FuturisticMapOverlay";
+import TrainingController from "./components/training/TrainingController";
 import "./styles/mapAnimations.css";
 
 function App() {
@@ -96,6 +98,10 @@ function App() {
       
       <div className="absolute top-4 left-4 w-72">
         <RiskAssessmentPanel />
+      </div>
+      
+      <div className="absolute top-4 right-4 w-80">
+        <TrainingController />
       </div>
       
       <FuturisticHUD data={weatherData} />
