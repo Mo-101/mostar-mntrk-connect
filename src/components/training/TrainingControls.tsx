@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useApi } from '@/hooks/useApi';
 import { TrainingMetric } from '@/types/api';
-import { supabase, testSupabaseConnection, USE_MOCK_DATA } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { TrainingProgress } from './TrainingProgress';
 import { ConnectionStatus } from './ConnectionStatus';
@@ -16,26 +16,21 @@ export function TrainingControls() {
   const [accuracy, setAccuracy] = useState(0);
   const [loss, setLoss] = useState(0);
   const [isConnected, setIsConnected] = useState(false);
-  const [connectionError, setConnectionError] = useState<string | null>(null);
   
   useEffect(() => {
     const checkSupabaseConnection = async () => {
       try {
-        const { connected, error } = await testSupabaseConnection();
-        
-        if (connected) {
-          console.log("Successfully connected to Supabase");
+        const { data, error } = await supabase.from('training_metrics').select('count').limit(1);
+        if (!error) {
           setIsConnected(true);
-          setConnectionError(null);
+          console.log("Successfully connected to Supabase");
         } else {
           console.error("Supabase connection error:", error);
           setIsConnected(false);
-          setConnectionError(error as string);
         }
       } catch (err) {
         console.error("Error checking Supabase connection:", err);
         setIsConnected(false);
-        setConnectionError(err instanceof Error ? err.message : "Unknown error");
       }
     };
     
@@ -43,8 +38,8 @@ export function TrainingControls() {
     
     const fetchTrainingMetrics = async () => {
       try {
-        // Try to get metrics from Supabase if connected and not in mock mode
-        if (isConnected && !USE_MOCK_DATA) {
+        // Try to get metrics from Supabase
+        if (isConnected) {
           const { data, error } = await supabase
             .from('training_metrics')
             .select('*')
@@ -59,7 +54,7 @@ export function TrainingControls() {
           }
         }
         
-        // Fallback to API if Supabase fails or in mock mode
+        // Fallback to API if Supabase fails
         const latestMetric = await apiCall<TrainingMetric>(
           () => api.trainingMetrics?.getLatest() || 
                 Promise.resolve({ success: false, error: 'API not available' })
@@ -72,7 +67,6 @@ export function TrainingControls() {
         }
       } catch (error) {
         console.error("Error fetching training metrics:", error);
-        toast.error("Failed to fetch training metrics");
       }
     };
     
@@ -80,7 +74,7 @@ export function TrainingControls() {
     
     // Subscribe to real-time training updates
     let subscription;
-    if (isConnected && !USE_MOCK_DATA) {
+    if (isConnected) {
       subscription = supabase
         .channel('public:training_metrics')
         .on('postgres_changes', { 
@@ -92,13 +86,8 @@ export function TrainingControls() {
           setCurrentEpoch(data.epoch || 0);
           setAccuracy((data.accuracy || 0) * 100);
           setLoss(data.loss || 0);
-          toast.info(`Training update: Epoch ${data.epoch}`);
         })
-        .subscribe((status) => {
-          console.log('Supabase channel status:', status);
-        });
-        
-      console.log('Subscribed to Supabase real-time updates');
+        .subscribe();
     } else {
       // Fallback to mock real-time
       const unsubscribe = realtime.subscribe('training-update', (data) => {
@@ -119,14 +108,14 @@ export function TrainingControls() {
         supabase.removeChannel(subscription);
       }
     };
-  }, [isConnected, apiCall, api.trainingMetrics, realtime]);
+  }, [isConnected]);
   
   // Start training - connect to Supabase or fallback to API
   const handleStartTraining = async () => {
     setIsTraining(true);
     
     try {
-      if (isConnected && !USE_MOCK_DATA) {
+      if (isConnected) {
         // Record training start in Supabase
         const { error } = await supabase
           .from('training_sessions')
@@ -146,15 +135,14 @@ export function TrainingControls() {
         realtime.send('training-command', { action: 'start' });
         
         // Simulate training progress in mock mode
-        if (!api || USE_MOCK_DATA) {
-          toast.info("Using mock training data" + (USE_MOCK_DATA ? " (configured)" : " (Supabase connection unavailable)"));
+        if (!api) {
+          toast.info("Using mock training data (Supabase connection unavailable)");
           let epoch = currentEpoch;
           const interval = setInterval(() => {
             epoch += 1;
             if (epoch > totalEpochs) {
               clearInterval(interval);
               setIsTraining(false);
-              toast.success("Training completed!");
               return;
             }
             
@@ -188,7 +176,7 @@ export function TrainingControls() {
     setIsTraining(false);
     
     try {
-      if (isConnected && !USE_MOCK_DATA) {
+      if (isConnected) {
         // Record training pause in Supabase
         const { error } = await supabase
           .from('training_sessions')
@@ -221,7 +209,7 @@ export function TrainingControls() {
     setLoss(0);
     
     try {
-      if (isConnected && !USE_MOCK_DATA) {
+      if (isConnected) {
         // Record training reset in Supabase
         const { error } = await supabase
           .from('training_sessions')

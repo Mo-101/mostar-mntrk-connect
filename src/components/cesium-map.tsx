@@ -1,46 +1,61 @@
 
-import React, { useEffect, useRef, useState } from "react";
-import { Viewer, CameraFlyTo } from "resium";
-import { Cartesian3, Color, Ion } from "cesium";
-import { createWorldTerrainAsync } from "@cesium/engine";
+import { useEffect, useRef } from "react";
+import { Viewer, Scene, Globe, Camera } from "resium";
+import {
+  Cartesian3,
+  createWorldTerrainAsync,
+  Ion,
+  IonImageryProvider,
+  createOsmBuildingsAsync,
+  ShadowMode
+} from "@cesium/engine";
+import { WindParticleSystem3D } from "./WindParticleSystem3D";
 
-// Updated Cesium ion access token
-Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NTc3MzMsImlhdCI6MTYyMjY0NjQ5NH0.XcKpgANiY22ejXTcPEpn1LdtBFmjpfDgL1SJB6cOFS8";
-
-interface CesiumMapProps {
-  height?: string;
-  width?: string;
-}
-
-export const CesiumMapComponent: React.FC<CesiumMapProps> = ({ height = "100vh", width = "100%" }) => {
+export const CesiumMap = () => {
   const viewerRef = useRef<any>(null);
-  const [terrainLoaded, setTerrainLoaded] = useState(false);
 
+  // Initialize the Cesium viewer
   useEffect(() => {
     if (!viewerRef.current) return;
-
+    
     const viewer = viewerRef.current.cesiumElement;
     if (!viewer) return;
 
-    // Configure viewer
+    // Set viewer configuration
     viewer.scene.globe.enableLighting = true;
-    viewer.scene.skyAtmosphere.show = true;
+    viewer.scene.globe.showGroundAtmosphere = true;
     viewer.scene.fog.enabled = true;
-    
-    // Set background color
-    viewer.scene.backgroundColor = Color.fromCssColorString('#0D1326');
-    
-    // Add terrain with error handling
+    viewer.scene.skyAtmosphere.show = true;
+    viewer.scene.postProcessStages.fxaa.enabled = true;
+
+    // Add 3D buildings
+    const addBuildings = async () => {
+      try {
+        const osmBuildings = await createOsmBuildingsAsync();
+        viewer.scene.primitives.add(osmBuildings);
+      } catch (error) {
+        console.error("Error adding 3D buildings:", error);
+      }
+    };
+
+    // Create terrain and add 3D buildings
     createWorldTerrainAsync()
       .then(terrain => {
         viewer.terrainProvider = terrain;
-        setTerrainLoaded(true);
-      })
-      .catch(error => {
-        console.error("Error loading terrain:", error);
+        addBuildings();
       });
 
-    // Clean up on unmount
+    // Set initial camera position
+    viewer.camera.flyTo({
+      destination: Cartesian3.fromDegrees(9.0765, 7.3986, 1500000),
+      orientation: {
+        heading: 0.0,
+        pitch: -0.5,
+        roll: 0.0
+      }
+    });
+
+    // Clean up
     return () => {
       if (viewer && !viewer.isDestroyed()) {
         viewer.destroy();
@@ -48,39 +63,38 @@ export const CesiumMapComponent: React.FC<CesiumMapProps> = ({ height = "100vh",
     };
   }, []);
 
-  // Fixed: Remove the parameter from flyToBoundingSphere
-  const flyToBoundingSphere = () => {
-    if (!viewerRef.current || !viewerRef.current.cesiumElement) return;
-
-    const viewer = viewerRef.current.cesiumElement;
-    
-    // Use flyTo instead which correctly accepts parameters
-    viewer.camera.flyTo({
-      destination: Cartesian3.fromDegrees(8.6753, 9.0820, 1500000), // Nigeria coordinates
-      orientation: {
-        heading: 0.0,
-        pitch: -0.5,
-        roll: 0.0
-      }
-    });
-  };
-
   return (
-    <div style={{ width, height }} className="relative">
+    <div className="h-screen">
       <Viewer
         ref={viewerRef}
         full
         timeline={false}
         animation={false}
+        homeButton={false}
+        navigationInstructionsInitiallyVisible={false}
+        navigationHelpButton={false}
+        sceneModePicker={false}
         baseLayerPicker={false}
         geocoder={false}
-        homeButton={false}
-        sceneModePicker={false}
-        navigationHelpButton={false}
-      />
+        scene3DOnly={true}
+        shadows={true}
+        className="cesium-viewer-dark"
+      >
+        <Scene 
+          shadowMap={{ 
+            enabled: true,
+            size: 2048,
+            softShadows: true
+          }}
+        />
+        <Globe
+          enableLighting={true}
+          showGroundAtmosphere={true}
+          depthTestAgainstTerrain={true}
+        />
+        <Camera />
+        {viewerRef.current && <WindParticleSystem3D viewerRef={viewerRef} />}
+      </Viewer>
     </div>
   );
 };
-
-// Add this export to fix the import issues in other files
-export const CesiumMap = CesiumMapComponent;

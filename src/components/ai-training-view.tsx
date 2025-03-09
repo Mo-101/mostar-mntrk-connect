@@ -1,4 +1,3 @@
-
 import React from "react"
 import { CesiumMap } from "./cesium-map"
 import { TrainingControls } from "./training-controls"
@@ -18,3 +17,4 @@ export function AITrainingView() {
     </div>
   )
 }
+

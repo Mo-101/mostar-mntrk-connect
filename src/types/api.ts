@@ -1,42 +1,12 @@
 
-// Define types for API responses and data structures
-
-export interface MapLocation {
-  id: number;
-  name: string;
-  type: string;
-  risk_level?: 'LOW' | 'MEDIUM' | 'HIGH';
-  coordinates: [number, number]; // [longitude, latitude]
-  details?: {
-    temperature?: number;
-    humidity?: number;
-    population_count?: number;
-    description?: string;
-    last_observation?: string;
-  };
+// API Response types
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
 }
 
-export interface MapAlert {
-  id: number;
-  location: string;
-  coordinates: [number, number];
-  riskLevel: string;
-  timestamp: string;
-}
-
-export interface RiskAssessment {
-  id: number;
-  region: string;
-  risk_level: 'LOW' | 'MEDIUM' | 'HIGH';
-  assessment_date: string;
-  mitigation_measures?: string[];
-  details?: {
-    environmental_factors?: string[];
-    population_density?: number;
-    historical_data?: string;
-  };
-}
-
+// System metrics
 export interface SystemMetric {
   id: number;
   timestamp: string;
@@ -48,16 +18,32 @@ export interface SystemMetric {
   status: 'healthy' | 'warning' | 'critical';
 }
 
+// Risk assessment
+export interface RiskAssessment {
+  id: number;
+  region: string;
+  risk_level: 'LOW' | 'MEDIUM' | 'HIGH';
+  assessment_date: string;
+  mitigation_measures: string[];
+  details: {
+    environmental_factors: string[];
+    population_density: number;
+    historical_data: string;
+  };
+}
+
+// Training metrics
 export interface TrainingMetric {
   id: number;
   epoch: number;
   accuracy: number;
   loss: number;
-  val_accuracy?: number;
-  val_loss?: number;
+  val_accuracy: number;
+  val_loss: number;
   timestamp: string;
 }
 
+// AI logs
 export interface AILog {
   id: number;
   model: string;
@@ -68,6 +54,7 @@ export interface AILog {
   latency_ms: number;
 }
 
+// DeepSeek analysis result
 export interface DeepSeekAnalysis {
   response: string;
   metadata: {
@@ -80,13 +67,14 @@ export interface DeepSeekAnalysis {
   };
 }
 
+// Wind data point for 3D visualization
 export interface WindDataPoint {
   id: string;
-  coordinates: [number, number]; // [longitude, latitude]
-  u: number; // East-west component of wind vector
-  v: number; // North-south component of wind vector
-  speed: number; // Wind speed in m/s
-  direction: number; // Wind direction in degrees (0-360)
+  coordinates: [number, number];
+  u: number;
+  v: number;
+  speed: number;
+  direction: number;
   timestamp: string;
   position: {
     longitude: number;
@@ -96,22 +84,69 @@ export interface WindDataPoint {
   weather: string;
 }
 
-export interface Wind3DData {
-  timestamp: string;
-  points: WindDataPoint[];
-  maxSpeed: number;
-  minSpeed: number;
-  settings?: {
-    particleCount?: number;
-    particleSize?: number;
-    lineWidth?: number;
-    speedFactor?: number;
-    colorScale?: string[];
+// Types for LM Studio integration
+export interface LMStudioConfig {
+  baseUrl: string;
+  port: number;
+  enabled: boolean;
+  modelId: string;
+}
+
+export interface LMStudioResponse {
+  id: string;
+  object: string;
+  created: number;
+  model: string;
+  choices: {
+    index: number;
+    message: {
+      role: string;
+      content: string;
+    };
+    finish_reason: string;
+  }[];
+  usage: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
   };
 }
 
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
+// Map data types
+export interface MapLocation {
+  id: number;
+  name: string;
+  coordinates: [number, number];
+  type: 'observation' | 'risk' | 'monitoring' | 'reference';
+  risk_level?: 'LOW' | 'MEDIUM' | 'HIGH';
+  details?: {
+    temperature?: number;
+    humidity?: number;
+    population_count?: number;
+    description?: string;
+    last_observation?: string;
+  };
+}
+
+export interface MapAlert {
+  id: number | string;
+  location: string;
+  coordinates: [number, number];
+  riskLevel: string;
+  timestamp: string;
+}
+
+// Wind 3D data type for particle system
+export interface Wind3DData {
+  particles: number;
+  maxParticles: number;
+  particleHeight: number;
+  fadeOpacity: number;
+  dropRate: number;
+  dropRateBump: number;
+  speedFactor: number;
+  lineWidth: number;
+  width: number;
+  height: number;
+  points: WindDataPoint[];
 }

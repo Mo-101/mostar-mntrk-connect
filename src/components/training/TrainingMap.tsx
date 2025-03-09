@@ -1,12 +1,9 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Viewer, Entity } from "resium";
-import { Cartesian3, Color, ShadowMode, Ion } from "cesium";
+import { Cartesian3, Color, ShadowMode } from "cesium";
 import { createWorldTerrainAsync, Cesium3DTileset, Cesium3DTileStyle, IonResource } from "@cesium/engine";
 import { WindParticleSystem3D } from "@/components/WindParticleSystem3D";
-
-// Updated Cesium ion access token - Using a token with terrain privileges
-Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NTc3MzMsImlhdCI6MTYyMjY0NjQ5NH0.XcKpgANiY22ejXTcPEpn1LdtBFmjpfDgL1SJB6cOFS8";
 
 export function TrainingMap() {
   const viewerRef = useRef<any>(null);
@@ -35,7 +32,7 @@ export function TrainingMap() {
     viewer.scene.fog.density = 0.0002;
     viewer.scene.fog.screenSpaceErrorFactor = 4.0;
     
-    // Add terrain with error handling
+    // Add terrain
     createWorldTerrainAsync()
       .then(terrain => {
         viewer.terrainProvider = terrain;
@@ -43,8 +40,6 @@ export function TrainingMap() {
       })
       .catch(error => {
         console.error("Error loading terrain:", error);
-        // Set viewer as loaded even if terrain fails
-        setViewerLoaded(true);
       });
 
     // Dynamic camera movement
@@ -71,11 +66,7 @@ export function TrainingMap() {
 
     return () => {
       if (viewer && !viewer.isDestroyed()) {
-        try {
-          viewer.destroy();
-        } catch (e) {
-          console.error("Error destroying viewer:", e);
-        }
+        viewer.destroy();
       }
     };
   }, []);
@@ -94,10 +85,7 @@ export function TrainingMap() {
         geocoder={false}
         className="cesium-viewer-dark"
       >
-        {/* Only render WindParticleSystem3D when the viewer is fully loaded */}
-        {viewerLoaded && viewerInstance && viewerInstance.scene && (
-          <WindParticleSystem3D viewer={viewerInstance} />
-        )}
+        {viewerLoaded && viewerInstance && <WindParticleSystem3D viewer={viewerInstance} />}
       </Viewer>
       {/* Overlay gradient for better UI integration */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0D0F1C] to-transparent pointer-events-none" />
