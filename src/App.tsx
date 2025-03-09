@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import { CesiumMapWithData } from "./components/CesiumMapWithData";
@@ -18,7 +17,6 @@ function App() {
     { type: "clear", value: 28, unit: "°C" }
   ];
 
-  // Add mock news items
   const newsItems = [
     "High risk detected in Maiduguri region - Population density increasing",
     "Weather conditions in Lagos are favorable for population growth",
@@ -41,11 +39,9 @@ function App() {
     temperatureChange: 2
   });
 
-  // Simulate changing weather data with error handling
   useEffect(() => {
     try {
       const interval = setInterval(async () => {
-        // Simulate fetching real weather data
         const weatherResponse = await fetchWeatherData({ lat: 6.5244, lng: 3.3792 });
         
         if (weatherResponse.success && weatherResponse.data) {
@@ -58,7 +54,6 @@ function App() {
             alertMessage: weatherResponse.data.alertMessage
           }));
           
-          // Update risk assessment based on new weather data
           const locationData = { population: 1250 + Math.random() * 500 };
           const riskResponse = analyzeRiskLevels(weatherResponse.data, locationData);
           
@@ -84,7 +79,6 @@ function App() {
 
   useEffect(() => {
     try {
-      // Initialize real-time services
       const services = initializeRealtimeServices();
       services.startMonitoring();
       
@@ -104,13 +98,10 @@ function App() {
         <RiskAssessmentPanel />
       </div>
       
-      {/* Futuristic Weather HUD */}
       <FuturisticHUD data={weatherData} />
       
-      {/* Map Overlay and News Ticker */}
       <FuturisticMapOverlay stats={mapStats} newsItems={memoizedNewsItems} />
       
-      {/* Weather metrics */}
       <div className="w-full top-5 h-screen overflow-hidden">
         <WeatherMetrics metrics={weatherMetrics} />
       </div>    
