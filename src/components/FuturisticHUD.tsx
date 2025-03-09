@@ -6,9 +6,9 @@ import '../styles/futuristic.css';
 interface WeatherData {
   temperature?: number;
   windSpeed?: number;
-  alert?: boolean;
   humidity?: number;
   precipitation?: number;
+  alert?: boolean;
   alertMessage?: string;
 }
 
@@ -43,7 +43,7 @@ const FuturisticHUD = ({ data }: FuturisticHUDProps) => {
           transition={{ duration: 0.6 }}
         >
           <h3>Temperature</h3>
-          <p>{data.temperature || '--'}°C</p>
+          <p>{data.temperature?.toFixed(1) || '--'}°C</p>
         </motion.div>
         <motion.div 
           className="data-panel"
@@ -52,7 +52,7 @@ const FuturisticHUD = ({ data }: FuturisticHUDProps) => {
           transition={{ duration: 0.6 }}
         >
           <h3>Wind Speed</h3>
-          <p>{data.windSpeed || '--'} m/s</p>
+          <p>{data.windSpeed?.toFixed(1) || '--'} m/s</p>
         </motion.div>
         <motion.div 
           className="data-panel"

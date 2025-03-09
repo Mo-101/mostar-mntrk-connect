@@ -12,5 +12,16 @@ export const initializeRealtimeServices = () => {
   };
 };
 
+// Handle API errors gracefully
+export const handleApiErrors = (error: any) => {
+  console.warn('API Error handled:', error.message);
+  // Return fallback data instead of throwing
+  return {
+    success: false,
+    error: error.message,
+    data: null
+  };
+};
+
 // Additional API service methods would go here
 // For example, fetching weather data, submitting observations, etc.

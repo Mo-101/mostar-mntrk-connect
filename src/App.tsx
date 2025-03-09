@@ -41,30 +41,43 @@ function App() {
     temperatureChange: 2
   });
 
-  // Simulate changing weather data
+  // Simulate changing weather data with error handling
   useEffect(() => {
-    const interval = setInterval(() => {
-      setWeatherData(prev => ({
-        ...prev,
-        temperature: prev.temperature + (Math.random() * 2 - 1),
-        windSpeed: Math.max(0, prev.windSpeed + (Math.random() * 2 - 1)),
-        humidity: Math.min(100, Math.max(0, prev.humidity + (Math.random() * 5 - 2.5))),
-        alert: Math.random() > 0.9 // 10% chance of alert
-      }));
-    }, 5000);
-    
-    return () => clearInterval(interval);
+    try {
+      const interval = setInterval(() => {
+        setWeatherData(prev => ({
+          ...prev,
+          temperature: Number((prev.temperature + (Math.random() * 2 - 1)).toFixed(1)),
+          windSpeed: Math.max(0, Number((prev.windSpeed + (Math.random() * 2 - 1)).toFixed(1))),
+          humidity: Math.min(100, Math.max(0, Math.round(prev.humidity + (Math.random() * 5 - 2.5)))),
+          alert: Math.random() > 0.9 // 10% chance of alert
+        }));
+      }, 5000);
+      
+      return () => clearInterval(interval);
+    } catch (error) {
+      console.error("Error in weather simulation:", error);
+    }
   }, []);
 
   const memoizedNewsItems = useMemo(() => newsItems, []);
 
   useEffect(() => {
-    // Initialize real-time services
-    initializeRealtimeServices();
+    try {
+      // Initialize real-time services
+      const services = initializeRealtimeServices();
+      services.startMonitoring();
+      
+      return () => {
+        services.stopMonitoring();
+      };
+    } catch (error) {
+      console.error("Failed to initialize services:", error);
+    }
   }, []);
   
   return (
-    <div className="w-full h-screen overflow-hidden relative">
+    <div className="w-full h-screen overflow-hidden relative bg-black">
       <CesiumMapWithData />
       
       <div className="absolute top-4 left-4 w-72">

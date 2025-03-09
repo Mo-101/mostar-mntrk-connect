@@ -38,7 +38,7 @@ const FuturisticMapOverlay = ({ stats, newsItems }: FuturisticMapOverlayProps) =
             <div className="stat-label">Risk Level</div>
           </div>
           <div className="stat-item">
-            <div className="stat-value">{stats.population || 0}</div>
+            <div className="stat-value">{stats.population?.toLocaleString() || 0}</div>
             <div className="stat-label">Population</div>
           </div>
           <div className="stat-item">
