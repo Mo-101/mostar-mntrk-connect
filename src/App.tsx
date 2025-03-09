@@ -5,7 +5,7 @@ import { CesiumMapWithData } from "./components/CesiumMapWithData";
 import { WeatherMetrics } from "./components/WeatherMetrics";
 import { ConversationBox } from "./components/ConversationBox";
 import { RiskAssessmentPanel } from "./components/training/RiskAssessmentPanel";
-import { initializeRealtimeServices } from "./services/apiService";
+import { initializeRealtimeServices, fetchWeatherData, analyzeRiskLevels } from "./services/apiService";
 import { Toaster } from "./components/ui/toaster";
 import FuturisticHUD from "./components/FuturisticHUD";
 import FuturisticMapOverlay from "./components/FuturisticMapOverlay";
@@ -44,14 +44,34 @@ function App() {
   // Simulate changing weather data with error handling
   useEffect(() => {
     try {
-      const interval = setInterval(() => {
-        setWeatherData(prev => ({
-          ...prev,
-          temperature: Number((prev.temperature + (Math.random() * 2 - 1)).toFixed(1)),
-          windSpeed: Math.max(0, Number((prev.windSpeed + (Math.random() * 2 - 1)).toFixed(1))),
-          humidity: Math.min(100, Math.max(0, Math.round(prev.humidity + (Math.random() * 5 - 2.5)))),
-          alert: Math.random() > 0.9 // 10% chance of alert
-        }));
+      const interval = setInterval(async () => {
+        // Simulate fetching real weather data
+        const weatherResponse = await fetchWeatherData({ lat: 6.5244, lng: 3.3792 });
+        
+        if (weatherResponse.success && weatherResponse.data) {
+          setWeatherData(prev => ({
+            ...prev,
+            temperature: Number(weatherResponse.data.temperature.toFixed(1)),
+            windSpeed: Math.max(0, Number(weatherResponse.data.windSpeed.toFixed(1))),
+            humidity: Math.min(100, Math.max(0, Math.round(weatherResponse.data.humidity))),
+            alert: weatherResponse.data.alert,
+            alertMessage: weatherResponse.data.alertMessage
+          }));
+          
+          // Update risk assessment based on new weather data
+          const locationData = { population: 1250 + Math.random() * 500 };
+          const riskResponse = analyzeRiskLevels(weatherResponse.data, locationData);
+          
+          if (riskResponse.success && riskResponse.data) {
+            setMapStats(prev => ({
+              ...prev,
+              riskLevel: riskResponse.data.riskLevel,
+              population: Math.round(locationData.population),
+              precipitationChance: Math.round(weatherResponse.data.precipitation),
+              temperatureChange: Number((Math.random() * 4 - 2).toFixed(1))
+            }));
+          }
+        }
       }, 5000);
       
       return () => clearInterval(interval);
