@@ -81,3 +81,6 @@ export const CesiumMapComponent: React.FC<CesiumMapProps> = ({ height = "100vh",
     </div>
   );
 };
+
+// Add this export to fix the import issues in other files
+export const CesiumMap = CesiumMapComponent;
