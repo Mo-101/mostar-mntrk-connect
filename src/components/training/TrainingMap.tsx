@@ -5,8 +5,8 @@ import { Cartesian3, Color, ShadowMode, Ion } from "cesium";
 import { createWorldTerrainAsync, Cesium3DTileset, Cesium3DTileStyle, IonResource } from "@cesium/engine";
 import { WindParticleSystem3D } from "@/components/WindParticleSystem3D";
 
-// Updated Cesium ion access token - Using a valid public token that works with terrain
-Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0ZWI5ZDk2OS05YmVhLTRkZjEtOWI3Ny0wYzBkOTYzOGE0ZDYiLCJpZCI6MjA1MDQsImlhdCI6MTY5NzE0MDY3OX0.4oWPYI1VRCt_ZCt8e0X9i-YKxJl9qI1Rp5YJLAxLKmE";
+// Updated Cesium ion access token - Using a token with terrain privileges
+Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NTc3MzMsImlhdCI6MTYyMjY0NjQ5NH0.XcKpgANiY22ejXTcPEpn1LdtBFmjpfDgL1SJB6cOFS8";
 
 export function TrainingMap() {
   const viewerRef = useRef<any>(null);

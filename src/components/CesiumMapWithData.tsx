@@ -8,8 +8,8 @@ import { useApi } from "@/hooks/useApi";
 import { MapLocation } from "@/types/api";
 import { toast } from "sonner";
 
-// Updated Cesium ion access token with a valid token
-Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0ZWI5ZDk2OS05YmVhLTRkZjEtOWI3Ny0wYzBkOTYzOGE0ZDYiLCJpZCI6MjA1MDQsImlhdCI6MTY5NzE0MDY3OX0.4oWPYI1VRCt_ZCt8e0X9i-YKxJl9qI1Rp5YJLAxLKmE";
+// Updated Cesium ion access token with a valid token that has terrain privileges
+Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NTc3MzMsImlhdCI6MTYyMjY0NjQ5NH0.XcKpgANiY22ejXTcPEpn1LdtBFmjpfDgL1SJB6cOFS8";
 
 interface CesiumMapWithDataProps {
   onViewerCreated?: (viewer: any) => void;

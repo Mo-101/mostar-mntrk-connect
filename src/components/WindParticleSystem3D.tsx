@@ -39,6 +39,11 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
       return;
     }
     
+    if (!viewer.scene) {
+      console.log("Viewer scene is not available for WindParticleSystem3D");
+      return;
+    }
+    
     // Add a small delay to ensure the viewer is fully initialized
     const checkViewerReady = () => {
       if (viewer && viewer.scene) {
@@ -144,7 +149,8 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
   
   useEffect(() => {
     // Only proceed if the viewer is ready
-    if (!viewerReady) {
+    if (!viewerReady || !viewer || !viewer.scene) {
+      console.log("WindParticleSystem3D: Viewer or scene not ready, skipping initialization");
       return;
     }
     
@@ -177,9 +183,11 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
           windData = convertToWindData(weather);
         }
         
-        if (viewer && !viewer.isDestroyed()) {
+        if (viewer && viewer.scene && !viewer.isDestroyed()) {
           // Create particle system
           createParticleSystem(windData, weather);
+        } else {
+          console.error("Cannot create particle system: viewer not ready, destroyed, or missing scene");
         }
         
         // Store wind data if needed
@@ -208,7 +216,7 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
     // Set up update timer (every 30 seconds)
     updateTimerRef.current = window.setInterval(async () => {
       try {
-        if (!viewer || viewer.isDestroyed()) {
+        if (!viewer || !viewer.scene || viewer.isDestroyed()) {
           // If viewer is no longer valid, clear the interval
           if (updateTimerRef.current) {
             clearInterval(updateTimerRef.current);
@@ -239,18 +247,16 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
         updateTimerRef.current = null;
       }
       
-      if (windParticlesRef.current) {
+      if (windParticlesRef.current && viewer && viewer.scene && !viewer.isDestroyed()) {
         try {
-          if (viewer && viewer.scene && !viewer.isDestroyed()) {
-            if (Array.isArray(windParticlesRef.current)) {
-              windParticlesRef.current.forEach(system => {
-                if (viewer.scene.primitives.contains(system)) {
-                  viewer.scene.primitives.remove(system);
-                }
-              });
-            } else if (viewer.scene.primitives.contains(windParticlesRef.current)) {
-              viewer.scene.primitives.remove(windParticlesRef.current);
-            }
+          if (Array.isArray(windParticlesRef.current)) {
+            windParticlesRef.current.forEach(system => {
+              if (viewer.scene.primitives.contains(system)) {
+                viewer.scene.primitives.remove(system);
+              }
+            });
+          } else if (viewer.scene.primitives.contains(windParticlesRef.current)) {
+            viewer.scene.primitives.remove(windParticlesRef.current);
           }
         } catch (e) {
           console.error("Error cleaning up wind particles:", e);
@@ -262,13 +268,8 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
   
   // Function to create the particle system
   const createParticleSystem = (windData: WindDataPoint[], weather: WeatherData) => {
-    if (!viewer || !viewerReady || viewer.isDestroyed()) {
-      console.log("Cannot create particle system: viewer not ready or destroyed");
-      return;
-    }
-    
-    if (!viewer.scene) {
-      console.log("Cannot create particle system: viewer.scene is undefined");
+    if (!viewer || !viewerReady || !viewer.scene || viewer.isDestroyed()) {
+      console.log("Cannot create particle system: viewer not ready, destroyed, or missing scene");
       return;
     }
     
@@ -278,7 +279,7 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
     }
     
     // Remove existing particle system if any
-    if (windParticlesRef.current) {
+    if (windParticlesRef.current && viewer.scene) {
       try {
         if (Array.isArray(windParticlesRef.current)) {
           windParticlesRef.current.forEach(system => {
@@ -337,8 +338,12 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
         
         // Add to scene
         try {
-          viewer.scene.primitives.add(particleSystem);
-          windParticlesRef.current.push(particleSystem);
+          if (viewer.scene && viewer.scene.primitives) {
+            viewer.scene.primitives.add(particleSystem);
+            windParticlesRef.current.push(particleSystem);
+          } else {
+            console.error("Cannot add particle system: viewer.scene.primitives is not available");
+          }
         } catch (error) {
           console.error("Error adding particle system to scene:", error);
         }
@@ -350,7 +355,10 @@ export function WindParticleSystem3D({ viewer }: WindParticleSystem3DProps) {
   
   // Function to update an existing particle system
   const updateParticleSystem = (windData: WindDataPoint[], weather: WeatherData) => {
-    if (!viewer || !viewer.scene || !windData.length || !windParticlesRef.current) return;
+    if (!viewer || !viewer.scene || !windData.length || !windParticlesRef.current) {
+      console.log("Cannot update particle system: Missing required components");
+      return;
+    }
     
     // Clean up old systems
     try {

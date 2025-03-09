@@ -1,113 +1,83 @@
 
-import { useEffect, useRef } from "react";
-import { Viewer, Scene, Globe, Camera } from "resium";
-import {
-  Cartesian3,
-  createWorldTerrainAsync,
-  Ion,
-  IonImageryProvider,
-  createOsmBuildingsAsync,
-  ShadowMap,
-  Color
-} from "@cesium/engine";
-import { WindParticleSystem3D } from "@/components/WindParticleSystem3D";
+import React, { useEffect, useRef, useState } from "react";
+import { Viewer, CameraFlyTo } from "resium";
+import { Cartesian3, Color, Ion } from "cesium";
+import { createWorldTerrainAsync } from "@cesium/engine";
 
-// Set Cesium ion access token
-Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0ZWI5ZDk2OS05YmVhLTRkZjEtOWI3Ny0wYzBkOTYzOGE0ZDYiLCJpZCI6MjA1MDQsImlhdCI6MTY5NzE0MDY3OX0.4oWPYI1VRCt_ZCt8e0X9i-YKxJl9qI1Rp5YJLAxLKmE";
+// Updated Cesium ion access token
+Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NTc3MzMsImlhdCI6MTYyMjY0NjQ5NH0.XcKpgANiY22ejXTcPEpn1LdtBFmjpfDgL1SJB6cOFS8";
 
-export const CesiumMap = () => {
+interface CesiumMapProps {
+  height?: string;
+  width?: string;
+}
+
+export const CesiumMapComponent: React.FC<CesiumMapProps> = ({ height = "100vh", width = "100%" }) => {
   const viewerRef = useRef<any>(null);
+  const [terrainLoaded, setTerrainLoaded] = useState(false);
 
-  // Initialize the Cesium viewer
   useEffect(() => {
     if (!viewerRef.current) return;
-    
+
     const viewer = viewerRef.current.cesiumElement;
     if (!viewer) return;
 
-    // Set viewer configuration
+    // Configure viewer
     viewer.scene.globe.enableLighting = true;
-    viewer.scene.globe.showGroundAtmosphere = true;
-    viewer.scene.fog.enabled = true;
     viewer.scene.skyAtmosphere.show = true;
-    viewer.scene.postProcessStages.fxaa.enabled = true;
-
-    // Add 3D buildings
-    const addBuildings = async () => {
-      try {
-        const osmBuildings = await createOsmBuildingsAsync();
-        viewer.scene.primitives.add(osmBuildings);
-      } catch (error) {
-        console.error("Error adding 3D buildings:", error);
-      }
-    };
-
-    // Create terrain and add 3D buildings
+    viewer.scene.fog.enabled = true;
+    
+    // Set background color
+    viewer.scene.backgroundColor = Color.fromCssColorString('#0D1326');
+    
+    // Add terrain with error handling
     createWorldTerrainAsync()
       .then(terrain => {
         viewer.terrainProvider = terrain;
-        addBuildings();
+        setTerrainLoaded(true);
       })
       .catch(error => {
         console.error("Error loading terrain:", error);
-        // Still try to add buildings even if terrain fails
-        addBuildings();
       });
 
-    // Configure shadows
-    viewer.shadowMap = new ShadowMap({
-      enabled: true,
-      size: 2048,
-      softShadows: true,
-      darkness: 0.3,
-      fadingEnabled: true,
-      maximumDistance: 10000,
-      normalOffset: false
-    });
+    // Clean up on unmount
+    return () => {
+      if (viewer && !viewer.isDestroyed()) {
+        viewer.destroy();
+      }
+    };
+  }, []);
 
-    // Using the correct format for flyTo
+  // Fixed: Remove the parameter from flyToBoundingSphere
+  const flyToBoundingSphere = () => {
+    if (!viewerRef.current || !viewerRef.current.cesiumElement) return;
+
+    const viewer = viewerRef.current.cesiumElement;
+    
+    // Use flyTo instead which correctly accepts parameters
     viewer.camera.flyTo({
-      destination: Cartesian3.fromDegrees(9.0765, 7.3986, 1500000),
+      destination: Cartesian3.fromDegrees(8.6753, 9.0820, 1500000), // Nigeria coordinates
       orientation: {
         heading: 0.0,
         pitch: -0.5,
         roll: 0.0
       }
     });
-
-    // Clean up
-    return () => {
-      if (viewer && !viewer.isDestroyed()) {
-        try {
-          viewer.destroy();
-        } catch (e) {
-          console.error("Error destroying viewer:", e);
-        }
-      }
-    };
-  }, []);
+  };
 
   return (
-    <div className="h-screen">
+    <div style={{ width, height }} className="relative">
       <Viewer
         ref={viewerRef}
         full
         timeline={false}
         animation={false}
-        homeButton={false}
-        navigationInstructionsInitiallyVisible={false}
-        navigationHelpButton={false}
-        sceneModePicker={false}
         baseLayerPicker={false}
         geocoder={false}
-        scene3DOnly={true}
-        shadows={true}
-        className="cesium-viewer-dark"
-      >
-        {viewerRef.current?.cesiumElement && viewerRef.current.cesiumElement.scene && (
-          <WindParticleSystem3D viewer={viewerRef.current.cesiumElement} />
-        )}
-      </Viewer>
+        homeButton={false}
+        sceneModePicker={false}
+        navigationHelpButton={false}
+      />
     </div>
   );
 };
