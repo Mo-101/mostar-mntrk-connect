@@ -4,16 +4,10 @@ import { Viewer, Entity, Globe, Scene, Camera } from "resium";
 import {
   Cartesian3,
   Color,
-  HeadingPitchRoll,
-  JulianDate,
-  PolylineGlowMaterialProperty,
-  Transforms,
-  Viewer as CesiumViewer,
   Math as CesiumMath,
   Ion,
   createWorldTerrain,
   createOsmBuildings,
-  IonResource,
 } from "cesium";
 
 interface CesiumMapProps {
@@ -43,7 +37,7 @@ const CesiumMapComponent: React.FC<CesiumMapProps> = ({
   zoom = 6,
   markers = [] 
 }) => {
-  const viewerRef = useRef<CesiumViewer | null>(null);
+  const viewerRef = useRef<any>(null);
   const [isViewerReady, setIsViewerReady] = useState(false);
 
   useEffect(() => {
@@ -64,7 +58,7 @@ const CesiumMapComponent: React.FC<CesiumMapProps> = ({
     }
   }, [center, zoom, isViewerReady]);
 
-  const handleViewerReady = (viewer: CesiumViewer) => {
+  const handleViewerReady = (viewer: any) => {
     viewerRef.current = viewer;
     viewer.scene.globe.depthTestAgainstTerrain = true;
     viewer.scene.globe.enableLighting = true;
