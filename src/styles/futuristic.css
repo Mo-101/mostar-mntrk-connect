@@ -1,0 +1,271 @@
+
+/* Futuristic Weather UI Styles */
+.hud-overlay {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 320px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: white;
+  z-index: 1000;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 100, 255, 0.3);
+}
+
+.hud-overlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #0ea5e9, #8b5cf6);
+  z-index: 1;
+}
+
+.hud-header {
+  padding: 10px 15px;
+  background: rgba(0, 0, 0, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-align: center;
+  color: #00ffff;
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.7);
+}
+
+.hud-content {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.data-panel {
+  background: rgba(20, 30, 50, 0.6);
+  border: 1px solid rgba(70, 130, 180, 0.4);
+  border-radius: 6px;
+  padding: 10px 15px;
+  transition: all 0.3s ease;
+}
+
+.data-panel:hover {
+  background: rgba(30, 40, 60, 0.8);
+  box-shadow: 0 0 15px rgba(0, 150, 255, 0.3);
+}
+
+.data-panel h3 {
+  font-size: 12px;
+  text-transform: uppercase;
+  margin: 0 0 5px 0;
+  color: #88ccff;
+  letter-spacing: 0.5px;
+}
+
+.data-panel p {
+  font-size: 18px;
+  margin: 0;
+  font-weight: 600;
+}
+
+.glow-alert {
+  box-shadow: 0 0 20px rgba(255, 50, 50, 0.6);
+}
+
+.alert-active {
+  color: #ff5050;
+  animation: pulse 2s infinite;
+  font-weight: bold;
+}
+
+.alert-inactive {
+  color: #88ccff;
+}
+
+.weather-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.map-overlay {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(100, 150, 255, 0.3);
+  border-radius: 8px;
+  padding: 15px;
+  color: white;
+  z-index: 1000;
+  width: 300px;
+}
+
+.map-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: bold;
+  color: #00ffff;
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+}
+
+.stat-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #88ccff;
+}
+
+.news-ticker {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border-top: 1px solid rgba(100, 150, 255, 0.3);
+}
+
+.news-ticker-label {
+  padding: 0 15px;
+  background: #ff3e3e;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.news-ticker-content {
+  padding: 0 20px;
+  color: #ffffff;
+  white-space: nowrap;
+  animation: ticker 20s linear infinite;
+}
+
+.alert-marker {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.location-marker {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes ticker {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-ping-fast {
+  animation: ping-fast 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.animate-ping-medium {
+  animation: ping-medium 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.animate-ping-slow {
+  animation: ping-slow 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes ping-fast {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+}
+
+@keyframes ping-medium {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  70% {
+    transform: scale(1.8);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+}
+
+@keyframes ping-slow {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+  80% {
+    transform: scale(2);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
